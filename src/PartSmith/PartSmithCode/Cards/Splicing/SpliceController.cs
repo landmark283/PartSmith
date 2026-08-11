@@ -98,6 +98,9 @@ public static class SpliceController
 
         // 星费(方案 A 宿主携带星费):宿主累加已拼效果的星费,基游戏随后免费接管灰显/扣星。
         RefreshHostStarCost(costCard);
+
+        // 效果卡预创建宿主状态修饰器(战斗外安全;OnPlay 里不能 AddModifier,见 EffectCardModelBase.OnSplicedToHost)。
+        effectCard.OnSplicedToHost(costCard);
         return modifier;
     }
 

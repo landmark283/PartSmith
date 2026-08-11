@@ -116,6 +116,49 @@ public class EffectAttachmentModifier : CardModifier
         await effect.ExecuteEffect(choiceContext, cardPlay);
     }
 
+    /// <summary>
+    /// 战斗事件钩子 AfterDeath:把"宿主拼卡所在战斗有生物死亡"转发给已拼效果卡。
+    /// 效果卡是 canonical 单例、不在战斗牌堆,原生钩子派发不到它;但本修饰器
+    /// (挂载于战斗牌堆里的宿主卡上)已被 BaseLib 注册为战斗钩子订阅者,这里把事件
+    /// 按宿主实例(<see cref="CardModifier.Owner"/>)转发给效果卡自己处理。
+    /// 只有重写了 <see cref="EffectCardModelBase.OnHostAfterDeath"/> 的效果卡才会响应。
+    /// </summary>
+    public override Task AfterDeath(
+        PlayerChoiceContext choiceContext, Creature creature, bool wasRemovalPrevented, float deathAnimLength)
+    {
+        var effect = ResolveEffectCard();
+        if (effect != null && Owner != null)
+        {
+            return effect.OnHostAfterDeath(Owner, choiceContext, creature, wasRemovalPrevented);
+        }
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// 宿主拼卡升级 → 把效果卡"升级才有的关键词"(如原版 Misery 升级带 Retain)
+    /// 补加到宿主上。BaseLib 的 <c>UpgradeModifiers</c> postfix 在 <c>UpgradeInternal</c>
+    /// 时遍历卡的修饰器调 <c>OnUpgrade()</c>,这里按效果卡需求补关键词。
+    /// </summary>
+    public override void OnUpgrade()
+    {
+        var effect = ResolveEffectCard();
+        if (effect?.UpgradeKeyword is { } keyword && Owner != null)
+        {
+            Owner.AddKeyword(keyword);
+        }
+    }
+
+    /// <summary>降级对称回收升级时加的关键词(少用,保持幂等)。</summary>
+    public override void OnDowngrade()
+    {
+        base.OnDowngrade();
+        var effect = ResolveEffectCard();
+        if (effect?.UpgradeKeyword is { } keyword && Owner != null)
+        {
+            Owner.RemoveKeyword(keyword);
+        }
+    }
+
     public EffectCardModelBase? ResolveEffectCard()
     {
         if (_effectCardId == null)

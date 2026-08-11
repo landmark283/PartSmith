@@ -1,0 +1,5 @@
+{
+    "PARTSMITH-SLOWDOWN_POWER.title": "动作缓慢",
+    "PARTSMITH-SLOWDOWN_POWER.description": "每次抽牌时消耗动作缓慢层数少抽等量的牌;每少抽 1 张牌消耗 1 层动作缓慢。",
+    "PARTSMITH-SLOWDOWN_POWER.smartDescription": "每次抽牌时消耗动作缓慢层数少抽等量的牌;每少抽 1 张牌消耗 1 层动作缓慢。"
+}

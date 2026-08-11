@@ -1,3 +1,5 @@
 {
-  
+    "PARTSMITH-SLOWDOWN_POWER.title": "Slowdown",
+    "PARTSMITH-SLOWDOWN_POWER.description": "Whenever you draw, spend Slowdown to draw fewer cards. Each card not drawn costs 1 Slowdown.",
+    "PARTSMITH-SLOWDOWN_POWER.smartDescription": "Whenever you draw, spend Slowdown to draw fewer cards. Each card not drawn costs 1 Slowdown."
 }

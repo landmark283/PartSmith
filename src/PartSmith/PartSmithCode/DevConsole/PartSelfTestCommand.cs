@@ -29,7 +29,7 @@ namespace PartSmith.PartSmithCode.DevConsole;
 ///    parttest room [&lt;encounterId&gt;]   → 直达测试战斗房间(默认 KNIGHTS_ELITE,正好 3 敌)。
 ///    parttest maxhp                    → 把当前战斗所有敌人血量顶到 999999999。
 ///    parttest make &lt;effectId&gt;[,&lt;effectId&gt;...]
-///        → 宿主=Scrap(0费),按序拼接所有效果,塞进手牌。
+///        → 宿主=TrinketShell(共享#1,0费3点),按序拼接所有效果,塞进手牌。
 ///    parttest make &lt;costCardId&gt; &lt;effectId&gt;[,&lt;effectId&gt;...]
 ///        → 显式指定宿主费用卡。
 ///    parttest info &lt;handIdx&gt;   → 打印手牌某张卡的信息。
@@ -92,7 +92,7 @@ public class PartSelfTestCommand : AbstractConsoleCmd
             return new CmdResult(false, "No effect ids given.");
         }
 
-        // 宿主费用卡:显式指定,或默认 Scrap。
+        // 宿主费用卡:显式指定,或默认 TrinketShell(共享 #1,0 费 3 点)。
         CostCardModelBase? hostModel;
         if (costId != null)
         {
@@ -104,10 +104,10 @@ public class PartSelfTestCommand : AbstractConsoleCmd
         }
         else
         {
-            hostModel = ModelDb.All.OfType<Scrap>().FirstOrDefault();
+            hostModel = ModelDb.All.OfType<TrinketShell>().FirstOrDefault();
             if (hostModel == null)
             {
-                return new CmdResult(false, "Scrap not found in ModelDb.");
+                return new CmdResult(false, "TrinketShell not found in ModelDb.");
             }
         }
 
@@ -221,6 +221,9 @@ public class PartSelfTestCommand : AbstractConsoleCmd
 
         // 星费(方案 A 宿主携带星费):与 AttachEffect 同步,让 parttest 造的拼卡也带星费。
         SpliceController.RefreshHostStarCost(costCard);
+
+        // 效果卡预创建宿主状态修饰器(与 AttachEffect 同步,parttest 拼卡也能测成长)。
+        effectCard.OnSplicedToHost(costCard);
     }
 
     private CmdResult Info(Player player, string[] args)
@@ -240,8 +243,9 @@ public class PartSelfTestCommand : AbstractConsoleCmd
             ? $"  points {SpliceController.UsedPoints(card)}/{cost.PointCapacity}"
             : "";
         string stars = card.CurrentStarCost > 0 ? $" starCost={card.CurrentStarCost}" : "";
+        string costInfo = $" cost={card.EnergyCost.GetResolved()}";
         string desc = card.GetDescriptionForPile(PileType.Hand, null) ?? "";
-        return new CmdResult(true, $"[{index}] {card.Title}\nType={card.Type} Target={card.TargetType} Keywords=[{keywords}]{points}{stars}\n{desc}");
+        return new CmdResult(true, $"[{index}] {card.Title}\nType={card.Type} Target={card.TargetType} Keywords=[{keywords}]{points}{stars}{costInfo}\n{desc}");
     }
 
     private CmdResult Encounters()

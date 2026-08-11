@@ -15,7 +15,7 @@ namespace PartSmith.PartSmithCode.DevConsole;
 
 /// <summary>
 /// 拼接调试命令(M1 验证用,不开奖励 UI):
-///   partsplice shell              → 往牌组加一张空壳费用卡(Scrap)
+///   partsplice shell              → 往牌组加一张空壳费用卡(TrinketShell,共享#1)
 ///   partsplice attach &lt;deckIndex&gt; &lt;effectId&gt; → 把效果卡拼到牌组第 deckIndex 张卡上(超容量会报错)
 ///   partsplice list               → 列出牌组里的费用卡与已拼效果
 /// effectId 用 SCREAMING_SNAKE,如 STRIKE_FRAGMENT / DRAW_FRAGMENT。
@@ -55,10 +55,10 @@ public class SpliceTestCommand : AbstractConsoleCmd
     {
         // 注意:不能用 ModelDb.AllCards——自定义池不在 AllCardPools 固定数组里,
         // 自定义卡只注册在 ModelDb.All(_contentById)中。
-        var shell = ModelDb.All.OfType<Scrap>().FirstOrDefault();
+        var shell = ModelDb.All.OfType<TrinketShell>().FirstOrDefault();
         if (shell == null)
         {
-            return new CmdResult(false, "Scrap not found in ModelDb.");
+            return new CmdResult(false, "TrinketShell not found in ModelDb.");
         }
 
         var runState = RunManager.Instance.DebugOnlyGetState();
@@ -69,7 +69,7 @@ public class SpliceTestCommand : AbstractConsoleCmd
 
         var card = runState.CreateCard(shell, player);
         Task task = CardPileCmd.Add(card, PileType.Deck);
-        return new CmdResult(task, true, $"Added Scrap to deck.");
+        return new CmdResult(task, true, $"Added TrinketShell to deck.");
     }
 
     private CmdResult Attach(Player player, string[] args)

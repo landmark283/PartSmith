@@ -52,6 +52,14 @@ public abstract class EffectCardModelBase(int cost, CardType type, CardRarity ra
     public virtual int UpgradeEnergyGain => 0;
 
     /// <summary>
+    /// 宿主拼卡升级时额外获得的关键词(原版卡升级带 Retain 等关键词时的替代)。
+    /// 效果卡自身的关键词在拼接时转移(见 <see cref="SpliceController.AttachEffect"/>);
+    /// 升级才有的关键词没有拼接时机可转移,由 <see cref="EffectAttachmentModifier.OnUpgrade"/>
+    /// 在宿主升级时补加到宿主上(反之 <c>OnDowngrade</c> 移除)。默认无。
+    /// </summary>
+    public virtual CardKeyword? UpgradeKeyword => null;
+
+    /// <summary>
     /// 本效果卡能吃到的宿主升级级数上限。默认 1:壳升再多级也只吃到一级增量
     /// (惰性加载仍按宿主升级态叠加,只是封顶 1 级)。
     /// 少数"可多次升级"卡(如灼热打击式)override 成更大值(或 int.MaxValue),
@@ -62,6 +70,30 @@ public abstract class EffectCardModelBase(int cost, CardType type, CardRarity ra
 
     /// <summary>效果脚本:拼卡打出时执行。宿主卡 = cardPlay.Card(攻击来源等用它)。</summary>
     public abstract Task ExecuteEffect(PlayerChoiceContext choiceContext, CardPlay cardPlay);
+
+    /// <summary>
+    /// 拼接完成时回调(战斗外,奖励/篝火/parttest)。效果卡可为宿主预创建所需的状态修饰器
+    /// (如 TheScythe 的成长暂存器 <see cref="Splicing.ScytheExtraModifier"/>)。
+    ///
+    /// 为什么必须在拼接时预创建而不是 OnPlay 里懒创建:
+    /// BaseLib 的 AfterCardPlayedPatch 用 foreach 遍历卡的 modifiers 调 OnPlay,
+    /// OnPlay 里再 <c>CardModifier.AddModifier</c> 会"修改正在遍历的集合"抛异常。
+    /// </summary>
+    public virtual void OnSplicedToHost(CardModel host)
+    {
+    }
+
+    /// <summary>
+    /// 宿主拼卡经历事件钩子时回调效果卡(事件语义由宿主/修饰器按需转发,默认无响应)。
+    /// 效果卡是 canonical 单例、不在战斗牌堆,原生事件钩子派发不到它身上;但它附着的
+    /// <see cref="EffectAttachmentModifier"/> 已被 BaseLib 注册为战斗钩子订阅者,
+    /// 由修饰器把 <c>AfterDeath</c> 等事件按宿主实例转发到这里。重写此方法可实现
+    /// "响应其他生物死亡"这类非 OnPlay 效果(如 Melancholy 的死亡加费)。
+    /// <paramref name="host"/> 是触发事件的宿主拼卡实例(per-host 上下文,可取 EnergyCost 等)。
+    /// </summary>
+    public virtual Task OnHostAfterDeath(
+        CardModel host, PlayerChoiceContext choiceContext, Creature creature, bool wasRemovalPrevented)
+        => Task.CompletedTask;
 
     /// <summary>
     /// 卡图来源:效果卡 1:1 镜像的原版卡。生成脚本为每张卡 override 成对应原版类型,
@@ -201,7 +233,7 @@ public abstract class EffectCardModelBase(int cost, CardType type, CardRarity ra
     /// </summary>
     /// <param name="hostCard">拼接后的宿主卡(提供 Owner / CombatState / Pile / IsUpgraded 等上下文)。</param>
     /// <param name="target">当前选中的目标敌人;未选中时为 null。</param>
-    public void RefreshPreviewForHost(CardModel hostCard, Creature? target)
+    public virtual void RefreshPreviewForHost(CardModel hostCard, Creature? target)
     {
         // runGlobalHooks 判定与 CardModel.UpdateDynamicVarPreview 完全一致:
         // 只在战斗中的手牌/打出区(或战斗内升级预览)才跑全局伤害/格挡 Hook(力量/易伤/虚弱)。
