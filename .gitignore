@@ -1,0 +1,24 @@
+# 第三方工具链 / 反编译产物 —— 各自有独立 git 仓库(fork)，父仓库不跟踪
+/.tools/
+
+# Godot 缓存与导出产物
+.godot/
+/dist/
+src/PartSmith/dist/
+
+# .NET 构建产物
+**/obj/
+**/bin/
+
+# 本机 Python 脚本运行产物
+/tools/__pycache__/
+/tools/*.log
+*.pyc
+
+# 本机环境配置（含本地路径，不入库）
+/.vscode/
+/.claude/
+NuGet.config
+
+# 工具链生成的游戏状态快照
+sts2_state.json

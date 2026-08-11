@@ -1,0 +1,10 @@
+{
+  "PARTSMITH_SPLICE_TARGET_PROMPT": "选择要拼接的费用卡",
+  "PARTSMITH_SPLICE_REWARD_DESC": "选择一张效果卡,拼到卡组里的费用卡上",
+  "PARTSMITH_SPLICE_INSUFFICIENT_POINTS": "点数不足:卡组里没有能拼上这张效果卡的费用卡,请重新选择。",
+  "PARTSMITH_FISH_DISASSEMBLE_PROMPT": "选择要拆解的拼卡(可连续拆,ESC 进入重组)",
+  "PARTSMITH_FISH_SPLICE_EFFECT_PROMPT": "从奖励池里选择一张效果卡拼回",
+  "PARTSMITH_FISH_SPLICE_TARGET_PROMPT": "选择要拼上去的费用卡",
+  "PARTSMITH_FISH_CAUGHT": "钓起了 {count} 张效果卡!",
+  "PARTSMITH_FISH_NO_SPLICED_CARDS": "卡组里没有可拆解的拼卡。"
+}
