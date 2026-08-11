@@ -46,5 +46,21 @@
   "PARTSMITH-WANG.goldMonologue": "这些金币,足以再铸一剑。",
   "PARTSMITH-WANG.aromaPrinciple": "锻造的气息,伴随着星光的味道。",
   "PARTSMITH-WANG.banter.alive.endTurnPing": "该你出手了,伙伴。",
-  "PARTSMITH-WANG.banter.dead.endTurnPing": "……星光未灭。"
+  "PARTSMITH-WANG.banter.dead.endTurnPing": "……星光未灭。",
+  "PARTSMITH-BONE_MAN.title": "骨头人",
+  "PARTSMITH-BONE_MAN.titleObject": "骨头人",
+  "PARTSMITH-BONE_MAN.description": "一位与亡灵订下契约的骸骨术士。她驾驭 Osty 骨狼,以召唤、献祭与灵魂的力量行走于生死之间。",
+  "PARTSMITH-BONE_MAN.pronounSubject": "她",
+  "PARTSMITH-BONE_MAN.pronounObject": "她",
+  "PARTSMITH-BONE_MAN.possessiveAdjective": "她的",
+  "PARTSMITH-BONE_MAN.pronounPossessive": "她的",
+  "PARTSMITH-BONE_MAN.bestiaryQuote": "骨狼长啸,亡灵低语。",
+  "PARTSMITH-BONE_MAN.bestiaryKillQuote": "骸骨归于尘土。",
+  "PARTSMITH-BONE_MAN.cardsModifierTitle": "拼接",
+  "PARTSMITH-BONE_MAN.cardsModifierDescription": "费用卡提供骨架,效果卡嵌入其中,点数之和不能超过容量。",
+  "PARTSMITH-BONE_MAN.eventDeathPrevention": "骨狼的嚎叫正在将你唤回……",
+  "PARTSMITH-BONE_MAN.goldMonologue": "这些金币,足以再召一只骨狼。",
+  "PARTSMITH-BONE_MAN.aromaPrinciple": "墓土的气息,夹杂着灵魂的微光。",
+  "PARTSMITH-BONE_MAN.banter.alive.endTurnPing": "该你出手了,伙伴。",
+  "PARTSMITH-BONE_MAN.banter.dead.endTurnPing": "……骨头还撑着。"
 }

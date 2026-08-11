@@ -25,6 +25,14 @@ public abstract class CostCardModelBase(int cost, CardType type, CardRarity rari
     /// <summary>点数容量 X:可拼接的效果点数总和上限。</summary>
     public virtual int PointCapacity => 0;
 
+    /// <summary>
+    /// 壳可无限升级:升级槽 = int.MaxValue(原版默认 1,锻造一次就耗尽 → IsUpgradable 恒真,
+    /// 火堆可反复锻造)。具体效果卡吃到的升级级数各自用
+    /// <see cref="EffectCardModelBase.MaxUpgradeLevels"/> 封顶(默认 1 级;少数叠层卡
+    /// override 成更大值,增量按宿主升级等级叠加)。标题显示 +N(<see cref="Title"/> 用本属性)。
+    /// </summary>
+    public override int MaxUpgradeLevel => int.MaxValue;
+
     /// <summary>拼卡名 = 效果卡名字逗号连接;空壳 = 费用卡本名。兼容原版升级 + 后缀。</summary>
     public override string Title
     {

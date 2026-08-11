@@ -78,4 +78,25 @@ public static class PartSmithRewardFactory
             roomType == RoomType.Elite ? CardRarityOddsType.EliteEncounter : CardRarityOddsType.RegularEncounter);
         return new SpliceReward(options, 3, player);
     }
+
+    /// <summary>骨头人费用卡奖励:从 PartSmithBoneManCostCardPool 出 3 张 3 选 1(necrobinder 粉费用图标)。</summary>
+    public static CardReward CreateBoneManCostCardReward(Player player)
+    {
+        var options = new CardCreationOptions(
+            new[] { ModelDb.CardPool<PartSmithBoneManCostCardPool>() },
+            CardCreationSource.Encounter,
+            CardRarityOddsType.EliteEncounter);
+        return new CardReward(options, 3, player);
+    }
+
+    /// <summary>骨头人效果卡奖励:从 PartSmithBoneManEffectCardPool 出 3 张 3 选 1,拼到骨头人卡组里的费用卡上。
+    /// 稀有度权重按房间:Monster=RegularEncounter,Elite=EliteEncounter。</summary>
+    public static SpliceReward CreateBoneManEffectCardReward(Player player, RoomType roomType)
+    {
+        var options = new CardCreationOptions(
+            new[] { ModelDb.CardPool<PartSmithBoneManEffectCardPool>() },
+            CardCreationSource.Encounter,
+            roomType == RoomType.Elite ? CardRarityOddsType.EliteEncounter : CardRarityOddsType.RegularEncounter);
+        return new SpliceReward(options, 3, player);
+    }
 }

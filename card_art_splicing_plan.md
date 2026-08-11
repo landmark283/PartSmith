@@ -136,3 +136,73 @@ public override Texture2D? CustomPortrait
 - **去碎片后缀(2026-08-09,用户定)**:显示名不带 " Fragment"/" 碎片"(拼接卡名=效果名逗号连接,现在只显原版名)。JSON title/titleZh 全 84 张清洗(脚本 `tmp/strip_fragment.py`)+ 重跑生成脚本同步本地化;5 张 demo 卡 eng 去后缀、zhs 补中文条目。类名仍保留 `Fragment` 后缀(内部用,不影响显示)。
 - **精英怪奖励(2026-08-09,用户定)**:精英 = 1 费用卡 + 2 效果卡(`RewardInjectionPatch` 对 `RoomType.Elite` 再插一个 `CreateEffectCardReward`;两个 SpliceReward 同 `RewardsSetIndex=6`,稳定排序相邻)。普通小怪仍 1+1。
 - **构建 0 错 0 警**,4 文件(dll/pdb/json/pck)已部署,游戏已启动。验证点见 §7 清单。
+
+---
+
+## 9. 调试命令:手牌生成拼卡 + 升级(2026-08-11)
+
+控制台开关:`` ` ``(backtick,即 `~` 那个键)或 `Shift+8`;`Esc` 关闭。所有命令都要一局游戏在进行中。
+
+### 9.0 完整命令参考
+
+**`parttest`(PartSelfTestCommand,自动化自测/拼卡工具)**
+
+| 子命令 | 作用 |
+|---|---|
+| `parttest room [<encounterId>]` | 直达测试战斗房间(默认 `KNIGHTS_ELITE`,3 敌);`parttest encounters` 看全部合法 id |
+| `parttest maxhp` | 当前战斗所有敌人血量顶到 999999999(≈打不死) |
+| `parttest make [<costCardId>] <effectId[,effectId...]>` | 造拼卡并塞进手牌(战斗)或牌组(非战斗);宿主默认 `Scrap`,可显式指定费用卡;绕过点数容量校验 |
+| `parttest info <handIdx>` | 打印手牌第 handIdx 张卡的信息(标题/类型/关键词/点数/星费/描述) |
+| `parttest encounters` | 列出全部合法遭遇 id |
+| `parttest library [effect\|cost\|hunter_effect\|hunter_cost\|wang_effect\|wang_cost\|all]` | 图鉴自检:列出各池在图鉴里应显示的卡及可见状态(LOCKED/NOT_SEEN/VISIBLE),默认 effect |
+
+id 匹配容错:带不带 `PARTSMITH-` 前缀都认(`SLICE_FRAGMENT` / `PARTSMITH-SLICE_FRAGMENT` 均可)。
+
+**`partsplice`(SpliceTestCommand,往牌组拼接,走正常容量校验)**
+
+| 子命令 | 作用 |
+|---|---|
+| `partsplice shell` | 往牌组加一张空壳费用卡(Scrap) |
+| `partsplice attach <deckIndex> <effectId>` | 把效果卡拼到牌组第 deckIndex 张卡上(超容量报错) |
+| `partsplice list` | 列出牌组里的费用卡与已拼效果 |
+
+### 9.1 生成拼卡进手牌
+
+```
+parttest make SLICE_FRAGMENT
+```
+
+- `parttest`(`PartSelfTestCommand`)默认用 `Scrap`(0 费壳)当宿主,跳过点数容量校验,把效果卡拼上去再塞进卡堆。
+- **战斗中 → 加进手牌**;地图/非战斗 → 加进牌组。
+- ⚠ 不要用原版 `card PARTSMITH-SLICE_FRAGMENT hand` 加效果卡——那是**裸效果卡**(无宿主),不能正常打出。测拼卡必须走 `parttest make`。
+- 效果卡 id 用 SCREAMING_SNAKE,带不带 `PARTSMITH-` 前缀都行(2026-08-11 起命令做了容错):`SLICE_FRAGMENT` / `PARTSMITH-SLICE_FRAGMENT` 都认。常用:`SLICE_FRAGMENT`(猎人割裂)/ `BLUDGEON_FRAGMENT`(战士重锤)/ `DEVASTATE_FRAGMENT`(储君葬送)等;也可用 `partsplice` 系列(shell/attach/list)往牌组拼。
+
+### 9.2 查看手牌某张卡
+
+```
+parttest info 0
+```
+
+打印标题 / 类型 / 关键词 / 点数 / 星费 / 描述(描述走手牌预览,会实时反映升级后的数值)。
+
+### 9.3 升级(原版命令,可无限连发)
+
+```
+upgrade <手牌位置>
+```
+
+- 原装 `UpgradeCardConsoleCmd`,调 `CardCmd.Upgrade`;0 = 左手边第一张。
+- 壳 `MaxUpgradeLevel = int.MaxValue` 后,它的"已升满"守卫永不触发 → **可反复升级**,标题 `+N`。
+- 效果卡按 `MaxUpgradeLevels` 惰性缩放,统一封顶 1 级(割裂/重锤/葬送原无限叠层已于 2026-08-11 还原,不再每级一份增量;壳等级继续涨,效果只吃一级)。
+
+### 9.4 一条龙测试套路
+
+```
+parttest room                    ← 直达测试战斗(默认 KNIGHTS_ELITE,3 敌)
+parttest maxhp                   ← 敌人血量顶到 999999999,打不死
+parttest make SLICE_FRAGMENT     ← 拼卡进手牌
+parttest info 0                  ← 确认位置和初始数值(割裂 6 伤)
+upgrade 0                        ← 升 1 级;可连发
+upgrade 0
+parttest info 0                  ← 割裂显示 9(6+3;效果只升 1 级封顶,再连发壳等级涨但伤害不变)
+```

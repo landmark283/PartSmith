@@ -4,5 +4,7 @@
     "PARTSMITH_POOL_HUNTER_COST_TIP": "PartSmith Little Hunter cost cards (empty shells).",
     "PARTSMITH_POOL_HUNTER_EFFECT_TIP": "PartSmith Little Hunter effect cards.",
     "PARTSMITH_POOL_WANG_COST_TIP": "PartSmith Wang cost cards (empty shells).",
-    "PARTSMITH_POOL_WANG_EFFECT_TIP": "PartSmith Wang effect cards."
+    "PARTSMITH_POOL_WANG_EFFECT_TIP": "PartSmith Wang effect cards.",
+    "PARTSMITH_POOL_BONEMAN_COST_TIP": "PartSmith BoneMan cost cards (empty shells).",
+    "PARTSMITH_POOL_BONEMAN_EFFECT_TIP": "PartSmith BoneMan effect cards."
 }

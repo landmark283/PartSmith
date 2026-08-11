@@ -177,3 +177,22 @@ python build_final.py    # 读 ironclad_raw.json → 写 partsmith_effect_cards.
 
 - 修改 `supplement_upgrade_data.py` 后重跑:`python supplement_upgrade_data.py`(读 `partsmith_effect_cards.json`,就地更新)。
 - 若 `build_final.py` 重新生成 JSON,需再跑一次本脚本补回 `upgrade` 字段。
+
+### 9.4 无限升级(壳无限,效果惰性按级数,2026-08-11)
+
+**壳可无限升级**:`CostCardModelBase` override `MaxUpgradeLevel => int.MaxValue`(原版默认 1,锻造一次就耗尽)。由此 `IsUpgradable` 恒真,火堆可反复锻造同一张壳,标题显示 `+N`(等级数)。原版锻造屏/`CardCmd.Upgrade` 全部走 `IsUpgradable`,无需额外 patch。
+
+**效果惰性加载,默认封顶 1 级**:`EffectCardModelBase.MaxUpgradeLevels => 1`。效果卡仍是共享单例,升级增量不落地到 DynamicVars;执行(`UpgradedValue`/`UpgradedIntValue`)与展示(`RefreshPreviewForHost`)统一走 `EffectiveUpgradeLevels(hostCard) = min(hostCard.CurrentUpgradeLevel, MaxUpgradeLevels)`。壳升到 2 级、3 级时,普通效果卡仍只吃到一级增量(和原来"升级一次"完全一致)。
+
+**叠层卡(2026-08-11 已还原)**:`upgrade.levels` 字段保留支持(`MaxUpgradeLevels` 仍可配置),但割裂/重锤/葬送 3 张已改回缺省(封顶 1 级),不再"每级一份增量"。
+
+```json
+"upgrade": {
+  "vars": { "Damage": 10 },
+  "levels": 999,            // 可选:能吃 N 级宿主升级;缺省 = 1 级(现无卡使用,叠层卡已还原)
+  ...
+}
+```
+
+锻造预览已对齐:原版锻造/升级预览是**真实 UpgradeInternal 过的克隆**(`NDeckUpgradeSelectScreen.cs:311`),等级 = 当前+1,叠层增量按该等级计算,预览数字正确。
+

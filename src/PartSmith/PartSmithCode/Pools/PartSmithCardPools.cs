@@ -161,3 +161,53 @@ public class PartSmithWangEffectCardPool : CustomCardPoolModel
 
     public override Color EnergyOutlineColor => new Color("803D0E");
 }
+
+/// <summary>
+/// 骨头人(亡灵契约师)费用卡片专属池:与 <see cref="PartSmithCostCardPool"/> 同构,但费用图标换成原版亡灵契约师(necrobinder 粉)。
+/// 骨头人的费用卡 = 14 个 BoneMan 壳子类(复用战士壳全部逻辑,见 Cards/CostCards/BoneManCostShells.cs),
+/// 卡池归属本池 → 卡面费用图标/描边自动走亡灵契约师配色,不动大战士/猎人/王的池。
+/// 图标资源(游戏 pck 已核实存在):
+/// BigEnergyIconPath = energy_necrobinder.tres,TextEnergyIconPath = necrobinder_energy_icon.png,
+/// EnergyOutlineColor = #803367 / DeckEntryCardColor = #CD4EED(原版 NecrobinderCardPool 配色)。
+/// </summary>
+public class PartSmithBoneManCostCardPool : CustomCardPoolModel
+{
+    public override string Title => "partsmith_boneman_cost";
+
+    public override bool IsShared => true;
+
+    public override Color DeckEntryCardColor => new Color("CD4EED");
+
+    public override bool SeenByDefault => true;
+
+    public override bool IsColorless => true;
+
+    public override string? BigEnergyIconPath => "res://images/atlases/ui_atlas.sprites/card/energy_necrobinder.tres";
+
+    public override string? TextEnergyIconPath => "res://images/packed/sprite_fonts/necrobinder_energy_icon.png";
+
+    public override Color EnergyOutlineColor => new Color("803367");
+}
+
+/// <summary>
+/// 骨头人(亡灵契约师)效果卡片专属池:与 <see cref="PartSmithEffectCardPool"/> 同构,费用图标走亡灵契约师 necrobinder 粉。
+/// 阶段 B2 生成的骨头人效果卡(<原版亡灵契约师卡>Fragment)注册进本池。
+/// </summary>
+public class PartSmithBoneManEffectCardPool : CustomCardPoolModel
+{
+    public override string Title => "partsmith_boneman_effect";
+
+    public override bool IsShared => true;
+
+    public override Color DeckEntryCardColor => new Color("EE82EE");
+
+    public override bool SeenByDefault => true;
+
+    public override bool IsColorless => true;
+
+    public override string? BigEnergyIconPath => "res://images/atlases/ui_atlas.sprites/card/energy_necrobinder.tres";
+
+    public override string? TextEnergyIconPath => "res://images/packed/sprite_fonts/necrobinder_energy_icon.png";
+
+    public override Color EnergyOutlineColor => new Color("803367");
+}

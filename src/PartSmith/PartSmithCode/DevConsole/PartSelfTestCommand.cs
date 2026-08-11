@@ -44,7 +44,7 @@ public class PartSelfTestCommand : AbstractConsoleCmd
 {
     public override string CmdName => "parttest";
 
-    public override string Args => "room [<encounterId>] | maxhp | make [<costCardId>] <effectId[,effectId...]> | info <handIdx> | encounters | library [effect|cost|hunter_effect|hunter_cost|all]";
+    public override string Args => "room [<encounterId>] | maxhp | make [<costCardId>] <effectId[,effectId...]> | info <handIdx> | encounters | library [effect|cost|hunter_effect|hunter_cost|wang_effect|wang_cost|boneman_effect|boneman_cost|all]";
 
     public override string Description => "PartSmith self-test: make (splice + add to hand, capacity bypass), info <handIdx>, encounters, library (card library self-check)";
 
@@ -96,7 +96,7 @@ public class PartSelfTestCommand : AbstractConsoleCmd
         CostCardModelBase? hostModel;
         if (costId != null)
         {
-            hostModel = ModelDb.All.OfType<CostCardModelBase>().FirstOrDefault(c => c.Id.Entry == costId);
+            hostModel = ModelDb.All.OfType<CostCardModelBase>().FirstOrDefault(c => EntryMatches(c.Id.Entry, costId));
             if (hostModel == null)
             {
                 return new CmdResult(false, $"Cost card '{costId}' not found. Available: {string.Join(", ", ModelDb.All.OfType<CostCardModelBase>().Select(c => c.Id.Entry))}");
@@ -115,7 +115,7 @@ public class PartSelfTestCommand : AbstractConsoleCmd
         var effects = new List<EffectCardModelBase>();
         foreach (string id in effectEntries)
         {
-            var effect = ModelDb.All.OfType<EffectCardModelBase>().FirstOrDefault(c => c.Id.Entry == id);
+            var effect = ModelDb.All.OfType<EffectCardModelBase>().FirstOrDefault(c => EntryMatches(c.Id.Entry, id));
             if (effect == null)
             {
                 return new CmdResult(false, $"Effect card '{id}' not found. Available: {string.Join(", ", ModelDb.All.OfType<EffectCardModelBase>().Select(c => c.Id.Entry))}");
@@ -150,6 +150,13 @@ public class PartSelfTestCommand : AbstractConsoleCmd
         string desc = card.GetDescriptionForPile(targetPile, null) ?? "";
         return new CmdResult(task, true, $"Added spliced '{card.Title}' to '{targetPile}'.\n{desc}");
     }
+
+    /// <summary>匹配 id:接受带前缀(<c>PARTSMITH-X</c>)或不带前缀(<c>X</c>)两种写法。
+    /// 自定义卡 <see cref="CardModel.Id"/> 的 Entry 由 BaseLib <c>PrefixIdPatch</c> 加了
+    /// 命名空间前缀(如 <c>PARTSMITH-SLICE_FRAGMENT</c>);为省事,裸类名(<c>SLICE_FRAGMENT</c>)也认。</summary>
+    private static bool EntryMatches(string entry, string input)
+        => string.Equals(entry, input, System.StringComparison.OrdinalIgnoreCase)
+           || entry.EndsWith("-" + input, System.StringComparison.OrdinalIgnoreCase);
 
     /// <summary>
     /// 直达测试战斗房间(替代外部驱动反复调 <c>fight</c>,减少脚本连发导致的竞态/主线程污染)。
@@ -248,7 +255,7 @@ public class PartSelfTestCommand : AbstractConsoleCmd
     /// 列出各池在图鉴里**应该显示**的卡及其可见状态,等价于图鉴点该池筛选按钮后的可见集。
     /// 收卡 = <c>ModelDb.AllCards.Where(ShouldShowInCardLibrary)</c>;
     /// 状态 = 解锁(<c>GetUnlockedCards</c>)→ 已见(<c>DiscoveredCards</c>)→ 完整,否则 LOCKED / NOT_SEEN。
-    /// 用法:parttest library [effect|cost|hunter_effect|hunter_cost|all](默认 effect)。
+    /// 用法:parttest library [effect|cost|hunter_effect|hunter_cost|wang_effect|wang_cost|boneman_effect|boneman_cost|all](默认 effect)。
     /// 排查"某张卡在图鉴里不显示"时,先看它是否出现在本列表;出现再看状态是不是 LOCKED/NOT_SEEN。
     /// </summary>
     private CmdResult Library(string[] args)
@@ -261,11 +268,14 @@ public class PartSelfTestCommand : AbstractConsoleCmd
             "hunter_cost" => new[] { "PartSmithHunterCostCardPool" },
             "wang_effect" => new[] { "PartSmithWangEffectCardPool" },
             "wang_cost" => new[] { "PartSmithWangCostCardPool" },
+            "boneman_effect" => new[] { "PartSmithBoneManEffectCardPool" },
+            "boneman_cost" => new[] { "PartSmithBoneManCostCardPool" },
             "all" => new[]
             {
                 "PartSmithEffectCardPool", "PartSmithCostCardPool",
                 "PartSmithHunterEffectCardPool", "PartSmithHunterCostCardPool",
                 "PartSmithWangEffectCardPool", "PartSmithWangCostCardPool",
+                "PartSmithBoneManEffectCardPool", "PartSmithBoneManCostCardPool",
             },
             _ => new[] { "PartSmithEffectCardPool" },
         };

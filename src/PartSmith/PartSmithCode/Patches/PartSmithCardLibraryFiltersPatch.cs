@@ -42,6 +42,8 @@ internal static class PartSmithCardLibraryFiltersPatch
     private const string HunterEffectFilterName = "FILTER-partsmith_hunter_effect";
     private const string WangCostFilterName = "FILTER-partsmith_wang_cost";
     private const string WangEffectFilterName = "FILTER-partsmith_wang_effect";
+    private const string BoneManCostFilterName = "FILTER-partsmith_boneman_cost";
+    private const string BoneManEffectFilterName = "FILTER-partsmith_boneman_effect";
 
     /// <summary>
     /// 必须用最高优先级(后置补丁里先跑,已实证本版本 Harmony postfix 按优先级降序执行),
@@ -64,7 +66,7 @@ internal static class PartSmithCardLibraryFiltersPatch
         foreach (var key in poolFilters.Keys)
         {
             if (key.Name.ToString() is CostFilterName or EffectFilterName or HunterCostFilterName or HunterEffectFilterName
-                or WangCostFilterName or WangEffectFilterName)
+                or WangCostFilterName or WangEffectFilterName or BoneManCostFilterName or BoneManEffectFilterName)
             {
                 return;
             }
@@ -99,13 +101,24 @@ internal static class PartSmithCardLibraryFiltersPatch
             new Color("FF9E2C"), new LocString("card_library", "PARTSMITH_POOL_WANG_EFFECT_TIP"),
             (CardModel c) => c.Pool is PartSmithWangEffectCardPool);
 
-        // 大战士局内打开图鉴默认选中「费用卡池」;小猎人默认选中「猎人费用卡池」;王默认选中「王费用卡池」。
+        // 骨头人专属池(necrobinder 粉)过滤器按钮。
+        var boneManCostFilter = AddFilter(
+            __instance, poolFilters, miscFilter, BoneManCostFilterName,
+            new Color("CD4EED"), new LocString("card_library", "PARTSMITH_POOL_BONEMAN_COST_TIP"),
+            (CardModel c) => c.Pool is PartSmithBoneManCostCardPool);
+        AddFilter(
+            __instance, poolFilters, boneManCostFilter, BoneManEffectFilterName,
+            new Color("EE82EE"), new LocString("card_library", "PARTSMITH_POOL_BONEMAN_EFFECT_TIP"),
+            (CardModel c) => c.Pool is PartSmithBoneManEffectCardPool);
+
+        // 大战士局内打开图鉴默认选中「费用卡池」;小猎人默认选中「猎人费用卡池」;王默认选中「王费用卡池」;骨头人默认选中「骨头人费用卡池」。
         if (AccessTools.DeclaredField(typeof(NCardLibrary), "_cardPoolFilters").GetValue(__instance)
             is Dictionary<CharacterModel, NCardPoolFilter> cardPoolFilters)
         {
             cardPoolFilters[ModelDb.Character<BigWarrior>()] = costFilter;
             cardPoolFilters[ModelDb.Character<LittleHunter>()] = hunterCostFilter;
             cardPoolFilters[ModelDb.Character<Wang>()] = wangCostFilter;
+            cardPoolFilters[ModelDb.Character<BoneMan>()] = boneManCostFilter;
         }
     }
 

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Godot;
@@ -49,6 +50,15 @@ public abstract class EffectCardModelBase(int cost, CardType type, CardRarity ra
     /// ModifyDescription 在宿主已升级/升级预览时追加 "Gain N Energy."(本地化键 PARTSMITH_UPGRADE_ENERGY)。
     /// </summary>
     public virtual int UpgradeEnergyGain => 0;
+
+    /// <summary>
+    /// 本效果卡能吃到的宿主升级级数上限。默认 1:壳升再多级也只吃到一级增量
+    /// (惰性加载仍按宿主升级态叠加,只是封顶 1 级)。
+    /// 少数"可多次升级"卡(如灼热打击式)override 成更大值(或 int.MaxValue),
+    /// 此时增量按 <see cref="EffectiveUpgradeLevels"/> 级数叠加(每级一份 upgrade.vars 增量)。
+    /// 由生成脚本按 partsmith_effect_cards.json 的 upgrade.levels 内联成常量。
+    /// </summary>
+    public virtual int MaxUpgradeLevels => 1;
 
     /// <summary>效果脚本:拼卡打出时执行。宿主卡 = cardPlay.Card(攻击来源等用它)。</summary>
     public abstract Task ExecuteEffect(PlayerChoiceContext choiceContext, CardPlay cardPlay);
@@ -153,21 +163,26 @@ public abstract class EffectCardModelBase(int cost, CardType type, CardRarity ra
         return description.GetFormattedText();
     }
 
+    /// <summary>宿主拼卡当前给本效果带来的有效升级级数:未升级 = 0;升级后 = min(宿主等级, 本卡上限)。</summary>
+    protected int EffectiveUpgradeLevels(CardModel hostCard)
+        => hostCard.IsUpgraded ? Math.Min(hostCard.CurrentUpgradeLevel, MaxUpgradeLevels) : 0;
+
     /// <summary>
-    /// 升级感知取值:宿主拼卡已升级时,在基础值上叠加升级增量。
+    /// 升级感知取值:宿主拼卡每升一级,在基础值上叠加一份 upgradeDelta。
     ///
     /// 为什么不在效果卡上 override OnUpgrade 直接改 DynamicVars 基础值:
     /// 效果卡是 ModelDb 里的共享单例(ResolveEffectCard → ModelDb.GetById 返回同一实例),
     /// 改它的 DynamicVars 会跨战斗、跨拼卡泄漏(同 Rampage 处理)。
-    /// 所以升级增量一律在 ExecuteEffect 里按宿主拼卡的 IsUpgraded 实时叠加。
+    /// 所以升级增量一律在 ExecuteEffect 里按宿主拼卡的升级级数实时叠加。
     /// 增量来源 = partsmith_effect_cards.json 的 upgrade.vars(由生成脚本内联成常量)。
+    /// 级数封顶 = <see cref="MaxUpgradeLevels"/>(默认 1,壳升多级也只吃一级)。
     /// </summary>
     protected decimal UpgradedValue(CardPlay cardPlay, decimal baseValue, decimal upgradeDelta)
-        => baseValue + (cardPlay.Card.IsUpgraded ? upgradeDelta : 0m);
+        => baseValue + upgradeDelta * EffectiveUpgradeLevels(cardPlay.Card);
 
     /// <summary>同 <see cref="UpgradedValue"/>,用于 IntValue 取整型值的场景。</summary>
     protected int UpgradedIntValue(CardPlay cardPlay, int baseValue, int upgradeDelta)
-        => baseValue + (cardPlay.Card.IsUpgraded ? upgradeDelta : 0);
+        => baseValue + upgradeDelta * EffectiveUpgradeLevels(cardPlay.Card);
 
     /// <summary>
     /// 按 DynamicVar 名取"宿主拼卡升级"时该 var 的增量(仅展示用)。
@@ -194,10 +209,10 @@ public abstract class EffectCardModelBase(int cost, CardType type, CardRarity ra
         bool runGlobalHooks = hostCard.CombatState != null
             && (hostCard.Pile?.Type is PileType.Hand or PileType.Play
                 || hostCard.UpgradePreviewType == CardUpgradePreviewType.Combat);
-        bool isUpgraded = hostCard.IsUpgraded;
+        int levels = EffectiveUpgradeLevels(hostCard);
         foreach (var v in DynamicVars.Values)
         {
-            decimal delta = isUpgraded ? GetUpgradeDelta(v.Name) : 0m;
+            decimal delta = GetUpgradeDelta(v.Name) * levels;
             // 先清掉上一宿主/上次预览的残留预览值(DamageVar/BlockVar 等会重算 PreviewValue,
             // 但纯 DynamicVar 不重算,不清会残留上次升级宿主叠的增量)。无升级、非战斗时回到底值。
             v.PreviewValue = v.BaseValue;

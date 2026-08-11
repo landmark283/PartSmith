@@ -44,7 +44,7 @@ public class SummonForthFragment : EffectCardModelBase
         await CreatureCmd.TriggerAnim(cardPlay.Player.Creature, "Cast", cardPlay.Player.Character.CastAnimDelay);
         IEnumerable<SovereignBlade> cards = cardPlay.Player.PlayerCombatState.AllCards.OfType<SovereignBlade>().Where(delegate(SovereignBlade c)
         {
-            CardPile? pile = c.Pile;
+            CardPile pile = c.Pile;
             return pile == null || pile.Type != PileType.Hand;
         });
         await CardPileCmd.Add(cards, PileType.Hand);

@@ -94,7 +94,7 @@ public class SpliceTestCommand : AbstractConsoleCmd
         var costCard = (CostCardModelBase)target;
 
         string effectId = args[2].ToUpperInvariant();
-        var effect = ModelDb.All.OfType<EffectCardModelBase>().FirstOrDefault(c => c.Id.Entry == effectId);
+        var effect = ModelDb.All.OfType<EffectCardModelBase>().FirstOrDefault(c => EntryMatches(c.Id.Entry, effectId));
         if (effect == null)
         {
             string available = string.Join(", ", ModelDb.All.OfType<EffectCardModelBase>().Select(c => c.Id.Entry));
@@ -110,6 +110,12 @@ public class SpliceTestCommand : AbstractConsoleCmd
         }
         return new CmdResult(true, $"Spliced '{effect.Id.Entry}' onto '{target.Id.Entry}' (join {modifier.JoinIndex}).");
     }
+
+    /// <summary>匹配 id:接受带前缀(<c>PARTSMITH-X</c>)或不带前缀(<c>X</c>)两种写法
+    /// (自定义卡 Entry 带 BaseLib 命名空间前缀)。</summary>
+    private static bool EntryMatches(string entry, string input)
+        => string.Equals(entry, input, System.StringComparison.OrdinalIgnoreCase)
+           || entry.EndsWith("-" + input, System.StringComparison.OrdinalIgnoreCase);
 
     private CmdResult List(Player player)
     {

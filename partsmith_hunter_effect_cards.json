@@ -2526,7 +2526,7 @@
       "onPlayCode": "{\n\t\tArgumentNullException.ThrowIfNull(cardPlay.Target, \"cardPlay.Target\");\n\t\tNCombatRoom.Instance?.CombatVfxContainer.AddChildSafely(NThinSliceVfx.Create(cardPlay.Target, VfxColor.Red));\n\t\tfloat num = base.Owner.Character.AttackAnimDelay;\n\t\tif (SaveManager.Instance.PrefsSave.FastMode == FastModeType.Normal)\n\t\t{\n\t\t\tnum += 0.2f;\n\t\t}\n\t\tawait DamageCmd.Attack(base.DynamicVars.Damage.BaseValue).FromCard(this, cardPlay).Targeting(cardPlay.Target)\n\t\t\t.WithAttackerAnim(\"Attack\", num)\n\t\t\t.WithHitFx(\"vfx/vfx_attack_slash\", null, \"slash_attack.mp3\")\n\t\t\t.Execute(choiceContext);\n\t}",
       "onUpgradeCode": "{\n\t\tbase.DynamicVars.Damage.UpgradeValueBy(3m);\n\t}",
       "originalCost": 0,
-      "pointCost": 3,
+      "pointCost": 6,
       "portraitFrom": "Slice",
       "type": "Attack",
       "rarity": "Common",

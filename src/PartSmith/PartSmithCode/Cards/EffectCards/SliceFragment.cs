@@ -22,7 +22,7 @@ using System.Threading.Tasks;
 
 namespace PartSmith.PartSmithCode.Cards.EffectCards;
 
-/// <summary>效果卡:点数 3。Slice。效果同原版 Slice(猎人)。</summary>
+/// <summary>效果卡:点数 6。Slice。效果同原版 Slice(猎人)。</summary>
 [Pool(typeof(PartSmithHunterEffectCardPool))]
 public class SliceFragment : EffectCardModelBase
 {
@@ -30,7 +30,7 @@ public class SliceFragment : EffectCardModelBase
     {
     }
 
-    public override int PointCost => 3;
+    public override int PointCost => 6;
 
     protected override CardModel PortraitSourceCard => ModelDb.Card<Slice>();
     protected override IEnumerable<DynamicVar> CanonicalVars => new DynamicVar[]
