@@ -2,5 +2,7 @@
     "PARTSMITH_POOL_COST_TIP": "PartSmith 费用卡(空壳)。",
     "PARTSMITH_POOL_EFFECT_TIP": "PartSmith 效果卡。",
     "PARTSMITH_POOL_HUNTER_COST_TIP": "PartSmith 小猎人费用卡(空壳)。",
-    "PARTSMITH_POOL_HUNTER_EFFECT_TIP": "PartSmith 小猎人效果卡。"
+    "PARTSMITH_POOL_HUNTER_EFFECT_TIP": "PartSmith 小猎人效果卡。",
+    "PARTSMITH_POOL_WANG_COST_TIP": "PartSmith 王费用卡(空壳)。",
+    "PARTSMITH_POOL_WANG_EFFECT_TIP": "PartSmith 王效果卡。"
 }

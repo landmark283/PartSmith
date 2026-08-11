@@ -1,0 +1,3095 @@
+{
+  "cards": [
+    {
+      "className": "AlignmentFragment",
+      "name": "Alignment",
+      "id": "PARTSMITH-ALIGNMENT_FRAGMENT",
+      "starCost": 3,
+      "starCostX": false,
+      "title": "Alignment",
+      "titleZh": "星位序列",
+      "description": "Gain {Energy:energyIcons()}.",
+      "descriptionZh": "获得{Energy:energyIcons()}。",
+      "onPlayCode": "{\n\t\tawait CreatureCmd.TriggerAnim(base.Owner.Creature, \"Cast\", base.Owner.Character.CastAnimDelay);\n\t\tawait PlayerCmd.GainEnergy(base.DynamicVars.Energy.IntValue, base.Owner);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars.Energy.UpgradeValueBy(1m);\n\t}",
+      "originalCost": 0,
+      "pointCost": 4,
+      "portraitFrom": "Alignment",
+      "type": "Skill",
+      "rarity": "Uncommon",
+      "target": "Self",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new EnergyVar(2)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: Energy +1",
+        "vars": {
+          "Energy": 1
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "ArsenalFragment",
+      "name": "Arsenal",
+      "id": "PARTSMITH-ARSENAL_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "Arsenal",
+      "titleZh": "武器库",
+      "description": "Whenever you create a card, gain {ArsenalPower:diff()} [gold]Strength[/gold].",
+      "descriptionZh": "每当你生成一张牌，就获得{ArsenalPower:diff()}点[gold]力量[/gold]。",
+      "onPlayCode": "{\n\t\tawait CreatureCmd.TriggerAnim(base.Owner.Creature, \"PowerUp\", base.Owner.Character.PowerUpAnimDelay);\n\t\tawait PowerCmd.Apply<ArsenalPower>(choiceContext, base.Owner.Creature, base.DynamicVars[\"ArsenalPower\"].BaseValue, base.Owner.Creature, this);\n\t}",
+      "onUpgradeCode": "{\n\t\tAddKeyword(CardKeyword.Innate);\n\t}",
+      "originalCost": 1,
+      "pointCost": 8,
+      "portraitFrom": "Arsenal",
+      "type": "Power",
+      "rarity": "Rare",
+      "target": "Self",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new PowerVar<ArsenalPower>(1m)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: add Innate",
+        "vars": {},
+        "energyGain": null,
+        "addKeywords": [
+          "Innate"
+        ],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "AstralPulseFragment",
+      "name": "AstralPulse",
+      "id": "PARTSMITH-ASTRAL_PULSE_FRAGMENT",
+      "starCost": 3,
+      "starCostX": false,
+      "title": "Astral Pulse",
+      "titleZh": "星界脉冲",
+      "description": "Deal {Damage:diff()} damage to ALL enemies twice.",
+      "descriptionZh": "对所有敌人造成{Damage:diff()}点伤害两次。",
+      "onPlayCode": "{\n\t\tawait DamageCmd.Attack(base.DynamicVars.Damage.BaseValue).FromCard(this, cardPlay).TargetingAllOpponents(base.CombatState)\n\t\t\t.WithHitCount(2)\n\t\t\t.WithHitFx(\"vfx/vfx_starry_impact\")\n\t\t\t.SpawningHitVfxOnEachCreature()\n\t\t\t.Execute(choiceContext);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars.Damage.UpgradeValueBy(2m);\n\t}",
+      "originalCost": 0,
+      "pointCost": 3,
+      "portraitFrom": "AstralPulse",
+      "type": "Attack",
+      "rarity": "Common",
+      "target": "AllEnemies",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new DamageVar(6m, ValueProp.Move)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: Damage +2",
+        "vars": {
+          "Damage": 2
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "BeatIntoShapeFragment",
+      "name": "BeatIntoShape",
+      "id": "PARTSMITH-BEAT_INTO_SHAPE_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "Beat into Shape",
+      "titleZh": "锻打成型",
+      "description": "Deal {Damage:diff()} damage. [gold]Forge[/gold] {CalculationExtra:diff()} for each time you've hit the enemy this turn.",
+      "descriptionZh": "造成 {Damage:diff()} 点伤害。本回合每击中敌人一次,[gold]锻造[/gold]{CalculationExtra:diff()}。",
+      "onPlayCode": "{\n\t\tArgumentNullException.ThrowIfNull(cardPlay.Target, \"cardPlay.Target\");\n\t\tAttackCommand attackCommand = await DamageCmd.Attack(base.DynamicVars.Damage.BaseValue).FromCard(this, cardPlay).Targeting(cardPlay.Target)\n\t\t\t.WithHitFx(\"vfx/vfx_attack_blunt\", null, \"blunt_attack.mp3\")\n\t\t\t.Execute(choiceContext);\n\t\tdecimal amount = ((CalculatedVar)base.DynamicVars[\"CalculatedForge\"]).Calculate(cardPlay.Target);\n\t\tamount -= (decimal)attackCommand.Results.Count() * base.DynamicVars.CalculationExtra.BaseValue;\n\t\tawait ForgeCmd.Forge(amount, base.Owner, this);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars.Damage.UpgradeValueBy(2m);\n\t\tbase.DynamicVars.CalculationBase.UpgradeValueBy(2m);\n\t\tbase.DynamicVars.CalculationExtra.UpgradeValueBy(2m);\n\t}",
+      "originalCost": 1,
+      "pointCost": 8,
+      "portraitFrom": "BeatIntoShape",
+      "type": "Attack",
+      "rarity": "Rare",
+      "target": "AnyEnemy",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new DamageVar(5m, ValueProp.Move)",
+        "new CalculationBaseVar(5m)",
+        "new CalculationExtraVar(5m)",
+        "new CalculatedVar(\"CalculatedForge\").WithMultiplier((CardModel card, Creature? target) => CombatManager.Instance.History.Entries.OfType<DamageReceivedEntry>().Count((DamageReceivedEntry e) => e.Receiver == target && e.Dealer == card.Owner.Creature && e.Result.Props.IsPoweredAttack() && e.HappenedThisTurn(card.CombatState)))"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: CalculationBase +2, CalculationExtra +2, Damage +2",
+        "vars": {
+          "Damage": 2,
+          "CalculationBase": 2,
+          "CalculationExtra": 2
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "BegoneFragment",
+      "name": "Begone",
+      "id": "PARTSMITH-BEGONE_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "BEGONE!",
+      "titleZh": "下去！",
+      "description": "Choose a card in your [gold]Hand[/gold] to [gold]Transform[/gold] into [gold]{IfUpgraded:show:Minion Strike+|Minion Strike}[/gold].",
+      "descriptionZh": "选择你[gold]手牌[/gold]中的一张牌，将其[gold]变化[/gold]为[gold]{IfUpgraded:show:仆从打击+|仆从打击}[/gold]。",
+      "onPlayCode": "{\n\t\tCardModel cardModel = (await CardSelectCmd.FromHand(prefs: new CardSelectorPrefs(CardSelectorPrefs.TransformSelectionPrompt, 1), context: choiceContext, player: base.Owner, filter: null, source: this)).FirstOrDefault();\n\t\tif (cardModel != null)\n\t\t{\n\t\t\tCardModel cardModel2 = base.CombatState.CreateCard<MinionStrike>(base.Owner);\n\t\t\tif (base.IsUpgraded)\n\t\t\t{\n\t\t\t\tCardCmd.Upgrade(cardModel2);\n\t\t\t}\n\t\t\tawait CardCmd.Transform(cardModel, cardModel2);\n\t\t}\n\t}",
+      "onUpgradeCode": null,
+      "originalCost": 1,
+      "pointCost": 6,
+      "portraitFrom": "Begone",
+      "type": "Skill",
+      "rarity": "Common",
+      "target": "Self",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [],
+      "upgrade": {
+        "summary": "Upgrade: ",
+        "vars": {},
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "BigBangFragment",
+      "name": "BigBang",
+      "id": "PARTSMITH-BIG_BANG_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "Big Bang",
+      "titleZh": "大爆炸",
+      "description": "Draw {Cards:diff()} {Cards:plural:card|cards}.\nGain {Energy:energyIcons()}.\nGain {Stars:starIcons()}.\n[gold]Forge[/gold] {Forge:diff()}.",
+      "descriptionZh": "抽{Cards:diff()}张牌。\n获得{Energy:energyIcons()}。\n获得{Stars:starIcons()}。\n[gold]铸造[/gold]{Forge:diff()}。",
+      "onPlayCode": "{\n\t\tawait CreatureCmd.TriggerAnim(base.Owner.Creature, \"Cast\", base.Owner.Character.CastAnimDelay);\n\t\tawait CardPileCmd.Draw(choiceContext, base.DynamicVars.Cards.BaseValue, base.Owner);\n\t\tawait PlayerCmd.GainStars(base.DynamicVars.Stars.BaseValue, base.Owner);\n\t\tawait PlayerCmd.GainEnergy(base.DynamicVars.Energy.IntValue, base.Owner);\n\t\tawait ForgeCmd.Forge(base.DynamicVars.Forge.IntValue, base.Owner, this);\n\t}",
+      "onUpgradeCode": "{\n\t\tAddKeyword(CardKeyword.Innate);\n\t}",
+      "originalCost": 0,
+      "pointCost": 5,
+      "portraitFrom": "BigBang",
+      "type": "Skill",
+      "rarity": "Rare",
+      "target": "Self",
+      "gainsBlock": null,
+      "keywords": [
+        "Exhaust"
+      ],
+      "tags": [],
+      "dynamicVars": [
+        "new CardsVar(1)",
+        "new EnergyVar(1)",
+        "new StarsVar(1)",
+        "new ForgeVar(5)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: add Innate",
+        "vars": {},
+        "energyGain": null,
+        "addKeywords": [
+          "Innate"
+        ],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "BlackHoleFragment",
+      "name": "BlackHole",
+      "id": "PARTSMITH-BLACK_HOLE_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "Black Hole",
+      "titleZh": "黑洞",
+      "description": "Whenever you spend or gain {singleStarIcon}, deal {BlackHolePower:diff()} damage to ALL enemies.",
+      "descriptionZh": "每当你花费或获得{singleStarIcon}时，对所有敌人造成{BlackHolePower:diff()}点伤害。",
+      "onPlayCode": "{\n\t\tawait CreatureCmd.TriggerAnim(base.Owner.Creature, \"PowerUp\", base.Owner.Character.PowerUpAnimDelay);\n\t\tawait PowerCmd.Apply<BlackHolePower>(choiceContext, base.Owner.Creature, base.DynamicVars[\"BlackHolePower\"].BaseValue, base.Owner.Creature, this);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars[\"BlackHolePower\"].UpgradeValueBy(1m);\n\t}",
+      "originalCost": 1,
+      "pointCost": 7,
+      "portraitFrom": "BlackHole",
+      "type": "Power",
+      "rarity": "Uncommon",
+      "target": "Self",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new PowerVar<BlackHolePower>(3m)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: BlackHolePower +1",
+        "vars": {
+          "BlackHolePower": 1
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "BombardmentFragment",
+      "name": "Bombardment",
+      "id": "PARTSMITH-BOMBARDMENT_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "Bombardment",
+      "titleZh": "轰击",
+      "description": "Deal {Damage:diff()} damage.\nAt the start of your turn, if this is in your [gold]Exhaust Pile[/gold], play it.",
+      "descriptionZh": "造成{Damage:diff()}点伤害。\n你的回合开始时，如果这张牌在你的[gold]消耗牌堆[/gold]中，则将其打出。",
+      "onPlayCode": "{\n\t\tArgumentNullException.ThrowIfNull(cardPlay.Target, \"cardPlay.Target\");\n\t\tNCreature nCreature = NCombatRoom.Instance?.GetCreatureNode(cardPlay.Target);\n\t\tif (nCreature != null)\n\t\t{\n\t\t\tNLargeMagicMissileVfx nLargeMagicMissileVfx = NLargeMagicMissileVfx.Create(nCreature.GetBottomOfHitbox(), new Color(\"50b598\"));\n\t\t\tNCombatRoom.Instance.CombatVfxContainer.AddChildSafely(nLargeMagicMissileVfx);\n\t\t\tawait Cmd.Wait(nLargeMagicMissileVfx.WaitTime);\n\t\t}\n\t\tawait DamageCmd.Attack(base.DynamicVars.Damage.BaseValue).FromCard(this, cardPlay).Targeting(cardPlay.Target)\n\t\t\t.WithHitFx(\"vfx/vfx_attack_blunt\", null, \"blunt_attack.mp3\")\n\t\t\t.Execute(choiceContext);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars.Damage.UpgradeValueBy(6m);\n\t}",
+      "originalCost": 3,
+      "pointCost": 17,
+      "portraitFrom": "Bombardment",
+      "type": "Attack",
+      "rarity": "Rare",
+      "target": "AnyEnemy",
+      "gainsBlock": null,
+      "keywords": [
+        "Exhaust"
+      ],
+      "tags": [],
+      "dynamicVars": [
+        "new DamageVar(18m, ValueProp.Move)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: Damage +6",
+        "vars": {
+          "Damage": 6
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "BulwarkFragment",
+      "name": "Bulwark",
+      "id": "PARTSMITH-BULWARK_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "Bulwark",
+      "titleZh": "铸墙",
+      "description": "Gain {Block:diff()} [gold]Block[/gold].\n[gold]Forge[/gold] {Forge:diff()}.",
+      "descriptionZh": "获得{Block:diff()}点[gold]格挡[/gold]。\n[gold]铸造[/gold]{Forge:diff()}。",
+      "onPlayCode": "{\n\t\tawait CreatureCmd.GainBlock(base.Owner.Creature, base.DynamicVars.Block, cardPlay);\n\t\tawait CreatureCmd.TriggerAnim(base.Owner.Creature, \"Cast\", base.Owner.Character.CastAnimDelay);\n\t\tawait ForgeCmd.Forge(base.DynamicVars.Forge.IntValue, base.Owner, this);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars.Block.UpgradeValueBy(3m);\n\t\tbase.DynamicVars.Forge.UpgradeValueBy(3m);\n\t}",
+      "originalCost": 2,
+      "pointCost": 11,
+      "portraitFrom": "Bulwark",
+      "type": "Skill",
+      "rarity": "Uncommon",
+      "target": "Self",
+      "gainsBlock": true,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new BlockVar(12m, ValueProp.Move)",
+        "new ForgeVar(10)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: Block +3, Forge +3",
+        "vars": {
+          "Block": 3,
+          "Forge": 3
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "BundleOfJoyFragment",
+      "name": "BundleOfJoy",
+      "id": "PARTSMITH-BUNDLE_OF_JOY_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "Bundle of Joy",
+      "titleZh": "新生之喜",
+      "description": "Add {Cards:diff()} random Colorless {Cards:plural:card|cards} into your [gold]Hand[/gold].",
+      "descriptionZh": "将{Cards:diff()}张随机无色牌添加到你的[gold]手牌[/gold]。",
+      "onPlayCode": "{\n\t\tIEnumerable<CardModel> distinctForCombat = CardFactory.GetDistinctForCombat(base.Owner, ModelDb.CardPool<ColorlessCardPool>().GetUnlockedCards(base.Owner.UnlockState, base.RunState.CardMultiplayerConstraint), base.DynamicVars.Cards.IntValue, base.Owner.RunState.Rng.CombatCardGeneration);\n\t\tforeach (CardModel item in distinctForCombat)\n\t\t{\n\t\t\tawait CardPileCmd.AddGeneratedCardToCombat(item, PileType.Hand, base.Owner);\n\t\t}\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars.Cards.UpgradeValueBy(1m);\n\t}",
+      "originalCost": 1,
+      "pointCost": 8,
+      "portraitFrom": "BundleOfJoy",
+      "type": "Skill",
+      "rarity": "Rare",
+      "target": "Self",
+      "gainsBlock": null,
+      "keywords": [
+        "Exhaust"
+      ],
+      "tags": [],
+      "dynamicVars": [
+        "new CardsVar(3)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: Cards +1",
+        "vars": {
+          "Cards": 1
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "CelestialMightFragment",
+      "name": "CelestialMight",
+      "id": "PARTSMITH-CELESTIAL_MIGHT_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "Celestial Might",
+      "titleZh": "天穹之力",
+      "description": "Deal {Damage:diff()} damage {Repeat:diff()} {Repeat:plural:time|times}.",
+      "descriptionZh": "造成{Damage:diff()}点伤害{Repeat:diff()}次。",
+      "onPlayCode": "{\n\t\tArgumentNullException.ThrowIfNull(cardPlay.Target, \"cardPlay.Target\");\n\t\tawait DamageCmd.Attack(base.DynamicVars.Damage.BaseValue).WithHitCount(base.DynamicVars.Repeat.IntValue).FromCard(this, cardPlay)\n\t\t\t.Targeting(cardPlay.Target)\n\t\t\t.WithHitFx(\"vfx/vfx_starry_impact\", null, \"blunt_attack.mp3\")\n\t\t\t.Execute(choiceContext);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars.Repeat.UpgradeValueBy(1m);\n\t}",
+      "originalCost": 2,
+      "pointCost": 10,
+      "portraitFrom": "CelestialMight",
+      "type": "Attack",
+      "rarity": "Common",
+      "target": "AnyEnemy",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new DamageVar(6m, ValueProp.Move)",
+        "new RepeatVar(3)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: Repeat +1",
+        "vars": {
+          "Repeat": 1
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "ChargeFragment",
+      "name": "Charge",
+      "id": "PARTSMITH-CHARGE_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "CHARGE!!",
+      "titleZh": "冲锋！！",
+      "description": "Choose {Cards:diff()} {Cards:plural:card|cards} in your [gold]Draw Pile[/gold] to [gold]Transform[/gold] into\n[gold]{Cards:plural:{IfUpgraded:show:Minion Dive Bomb+|Minion Dive Bomb}[/gold]|{IfUpgraded:show:Minion Dive Bombs+|Minion Dive Bombs}[/gold]}.",
+      "descriptionZh": "选择你[gold]抽牌堆[/gold]中的{Cards:diff()}张牌，将其[gold]变化[/gold]为\n[gold]{IfUpgraded:show:仆从俯冲+|仆从俯冲}[/gold]。",
+      "onPlayCode": "{\n\t\tList<CardModel> selection = (await CardSelectCmd.FromCombatPile(choiceContext, PileType.Draw.GetPile(base.Owner), base.Owner, new CardSelectorPrefs(CardSelectorPrefs.TransformSelectionPrompt, base.DynamicVars.Cards.IntValue))).ToList();\n\t\tawait CreatureCmd.TriggerAnim(base.Owner.Creature, \"Cast\", base.Owner.Character.CastAnimDelay);\n\t\tforeach (CardModel item in selection)\n\t\t{\n\t\t\tCardPileAddResult? cardPileAddResult = await CardCmd.TransformTo<MinionDiveBomb>(item);\n\t\t\tif (base.IsUpgraded && cardPileAddResult.HasValue)\n\t\t\t{\n\t\t\t\tCardCmd.Upgrade(cardPileAddResult.Value.cardAdded);\n\t\t\t}\n\t\t}\n\t}",
+      "onUpgradeCode": null,
+      "originalCost": 1,
+      "pointCost": 7,
+      "portraitFrom": "Charge",
+      "type": "Skill",
+      "rarity": "Uncommon",
+      "target": "Self",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new CardsVar(2)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: ",
+        "vars": {},
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "ChildOfTheStarsFragment",
+      "name": "ChildOfTheStars",
+      "id": "PARTSMITH-CHILD_OF_THE_STARS_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "Child of the Stars",
+      "titleZh": "群星之子",
+      "description": "Whenever you spend {singleStarIcon}, gain {BlockForStars:diff()} [gold]Block[/gold] for each {singleStarIcon} spent.",
+      "descriptionZh": "每当你花费{singleStarIcon}时，每花费一点{singleStarIcon}，获得{BlockForStars:diff()}点[gold]格挡[/gold]。",
+      "onPlayCode": "{\n\t\tawait CreatureCmd.TriggerAnim(base.Owner.Creature, \"PowerUp\", base.Owner.Character.PowerUpAnimDelay);\n\t\tawait PowerCmd.Apply<ChildOfTheStarsPower>(choiceContext, base.Owner.Creature, base.DynamicVars[\"BlockForStars\"].BaseValue, base.Owner.Creature, this);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars[\"BlockForStars\"].UpgradeValueBy(1m);\n\t}",
+      "originalCost": 1,
+      "pointCost": 7,
+      "portraitFrom": "ChildOfTheStars",
+      "type": "Power",
+      "rarity": "Uncommon",
+      "target": "Self",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new DynamicVar(\"BlockForStars\", 2m)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: BlockForStars +1",
+        "vars": {
+          "BlockForStars": 1
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "CloakOfStarsFragment",
+      "name": "CloakOfStars",
+      "id": "PARTSMITH-CLOAK_OF_STARS_FRAGMENT",
+      "starCost": 1,
+      "starCostX": false,
+      "title": "Cloak of Stars",
+      "titleZh": "群星斗篷",
+      "description": "Gain {Block:diff()} [gold]Block[/gold].",
+      "descriptionZh": "获得{Block:diff()}点[gold]格挡[/gold]。",
+      "onPlayCode": "{\n\t\tawait CreatureCmd.GainBlock(base.Owner.Creature, base.DynamicVars.Block, cardPlay);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars.Block.UpgradeValueBy(3m);\n\t}",
+      "originalCost": 0,
+      "pointCost": 3,
+      "portraitFrom": "CloakOfStars",
+      "type": "Skill",
+      "rarity": "Common",
+      "target": "Self",
+      "gainsBlock": true,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new BlockVar(7m, ValueProp.Move)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: Block +3",
+        "vars": {
+          "Block": 3
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "CollisionCourseFragment",
+      "name": "CollisionCourse",
+      "id": "PARTSMITH-COLLISION_COURSE_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "Collision Course",
+      "titleZh": "碰撞轨迹",
+      "description": "Deal {Damage:diff()} damage.\nAdd a [gold]Debris[/gold] into your [gold]Hand[/gold].",
+      "descriptionZh": "造成{Damage:diff()}点伤害。\n将一张[gold]碎屑[/gold]添加至你的[gold]手牌[/gold]。",
+      "onPlayCode": "{\n\t\tArgumentNullException.ThrowIfNull(cardPlay.Target, \"cardPlay.Target\");\n\t\tawait DamageCmd.Attack(base.DynamicVars.Damage.BaseValue).FromCard(this, cardPlay).Targeting(cardPlay.Target)\n\t\t\t.WithHitFx(\"vfx/vfx_attack_blunt\", null, \"blunt_attack.mp3\")\n\t\t\t.Execute(choiceContext);\n\t\tawait CardPileCmd.AddGeneratedCardToCombat(base.CombatState.CreateCard<Debris>(base.Owner), PileType.Hand, base.Owner);\n\t\tawait Cmd.Wait(0.5f);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars.Damage.UpgradeValueBy(4m);\n\t}",
+      "originalCost": 0,
+      "pointCost": 3,
+      "portraitFrom": "CollisionCourse",
+      "type": "Attack",
+      "rarity": "Common",
+      "target": "AnyEnemy",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new DamageVar(10m, ValueProp.Move)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: Damage +4",
+        "vars": {
+          "Damage": 4
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "CometFragment",
+      "name": "Comet",
+      "id": "PARTSMITH-COMET_FRAGMENT",
+      "starCost": 5,
+      "starCostX": false,
+      "title": "Comet",
+      "titleZh": "彗星",
+      "description": "Deal {Damage:diff()} damage.\nApply {WeakPower:diff()} [gold]Weak[/gold].\nApply {VulnerablePower:diff()} [gold]Vulnerable[/gold].",
+      "descriptionZh": "造成{Damage:diff()}点伤害。\n给予{WeakPower:diff()}层[gold]虚弱[/gold]。\n给予{VulnerablePower:diff()}层[gold]易伤[/gold]。",
+      "onPlayCode": "{\n\t\tArgumentNullException.ThrowIfNull(cardPlay.Target, \"cardPlay.Target\");\n\t\tawait CreatureCmd.TriggerAnim(base.Owner.Creature, \"Cast\", base.Owner.Character.CastAnimDelay);\n\t\tNCreature nCreature = NCombatRoom.Instance?.GetCreatureNode(cardPlay.Target);\n\t\tif (nCreature != null)\n\t\t{\n\t\t\tNSmallMagicMissileVfx nSmallMagicMissileVfx = NSmallMagicMissileVfx.Create(nCreature.GetBottomOfHitbox(), new Color(\"50b598\"));\n\t\t\tNCombatRoom.Instance.CombatVfxContainer.AddChildSafely(nSmallMagicMissileVfx);\n\t\t\tawait Cmd.Wait(nSmallMagicMissileVfx.WaitTime);\n\t\t}\n\t\tawait DamageCmd.Attack(base.DynamicVars.Damage.BaseValue).FromCard(this, cardPlay).Targeting(cardPlay.Target)\n\t\t\t.WithNoAttackerAnim()\n\t\t\t.Execute(choiceContext);\n\t\tawait PowerCmd.Apply<WeakPower>(choiceContext, cardPlay.Target, base.DynamicVars.Weak.BaseValue, base.Owner.Creature, this);\n\t\tawait PowerCmd.Apply<VulnerablePower>(choiceContext, cardPlay.Target, base.DynamicVars.Vulnerable.BaseValue, base.Owner.Creature, this);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars.Damage.UpgradeValueBy(11m);\n\t}",
+      "originalCost": 0,
+      "pointCost": 5,
+      "portraitFrom": "Comet",
+      "type": "Attack",
+      "rarity": "Rare",
+      "target": "AnyEnemy",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new DamageVar(33m, ValueProp.Move)",
+        "new PowerVar<VulnerablePower>(3m)",
+        "new PowerVar<WeakPower>(3m)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: Damage +11",
+        "vars": {
+          "Damage": 11
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "ConquerorFragment",
+      "name": "Conqueror",
+      "id": "PARTSMITH-CONQUEROR_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "Conqueror",
+      "titleZh": "征服者",
+      "description": "[gold]Forge[/gold] {Forge:diff()}.\n[gold]Sovereign Blade[/gold] deals double damage to the enemy this turn.",
+      "descriptionZh": "[gold]铸造[/gold]{Forge:diff()}。\n[gold]君王之剑[/gold]在本回合对敌人造成双倍伤害。",
+      "onPlayCode": "{\n\t\tArgumentNullException.ThrowIfNull(cardPlay.Target, \"cardPlay.Target\");\n\t\tawait CreatureCmd.TriggerAnim(base.Owner.Creature, \"Cast\", base.Owner.Character.CastAnimDelay);\n\t\tawait ForgeCmd.Forge(base.DynamicVars.Forge.IntValue, base.Owner, this);\n\t\tawait PowerCmd.Apply<ConquerorPower>(choiceContext, cardPlay.Target, 1m, base.Owner.Creature, this);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars.Forge.UpgradeValueBy(2m);\n\t}",
+      "originalCost": 1,
+      "pointCost": 7,
+      "portraitFrom": "Conqueror",
+      "type": "Skill",
+      "rarity": "Uncommon",
+      "target": "AnyEnemy",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new ForgeVar(3)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: Forge +2",
+        "vars": {
+          "Forge": 2
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "ConvergenceFragment",
+      "name": "Convergence",
+      "id": "PARTSMITH-CONVERGENCE_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "Convergence",
+      "titleZh": "汇流",
+      "description": "Next turn,\ngain {Energy:energyIcons()} and {Stars:starIcons()}.\n[gold]Retain[/gold] your [gold]Hand[/gold] this turn.",
+      "descriptionZh": "在本回合[gold]保留[/gold]你的[gold]手牌[/gold]。\n在下个回合，\n获得{Energy:energyIcons()}与{Stars:starIcons()}。",
+      "onPlayCode": "{\n\t\tawait CreatureCmd.TriggerAnim(base.Owner.Creature, \"Cast\", base.Owner.Character.CastAnimDelay);\n\t\tawait PowerCmd.Apply<RetainHandPower>(choiceContext, base.Owner.Creature, 1m, base.Owner.Creature, this);\n\t\tawait PowerCmd.Apply<EnergyNextTurnPower>(choiceContext, base.Owner.Creature, base.DynamicVars.Energy.BaseValue, base.Owner.Creature, this);\n\t\tawait PowerCmd.Apply<StarNextTurnPower>(choiceContext, base.Owner.Creature, base.DynamicVars.Stars.BaseValue, base.Owner.Creature, this);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars.Stars.UpgradeValueBy(1m);\n\t}",
+      "originalCost": 1,
+      "pointCost": 7,
+      "portraitFrom": "Convergence",
+      "type": "Skill",
+      "rarity": "Uncommon",
+      "target": "Self",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new EnergyVar(1)",
+        "new StarsVar(1)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: Stars +1",
+        "vars": {
+          "Stars": 1
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "CosmicIndifferenceFragment",
+      "name": "CosmicIndifference",
+      "id": "PARTSMITH-COSMIC_INDIFFERENCE_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "Cosmic Indifference",
+      "titleZh": "宇宙冷漠",
+      "description": "Gain {Block:diff()} [gold]Block[/gold].\nPut a card from your [gold]Discard Pile[/gold] on top of your [gold]Draw Pile[/gold].",
+      "descriptionZh": "获得{Block:diff()}点[gold]格挡[/gold]。\n将[gold]弃牌堆[/gold]中的一张牌放到你的[gold]抽牌堆[/gold]的顶部。",
+      "onPlayCode": "{\n\t\tawait CreatureCmd.GainBlock(base.Owner.Creature, base.DynamicVars.Block, cardPlay);\n\t\tCardSelectorPrefs prefs = new CardSelectorPrefs(base.SelectionScreenPrompt, 1);\n\t\tPileType.Discard.GetPile(base.Owner);\n\t\tCardModel cardModel = (await CardSelectCmd.FromCombatPile(choiceContext, PileType.Discard.GetPile(base.Owner), base.Owner, prefs)).FirstOrDefault();\n\t\tbool flag = cardModel != null;\n\t\tbool flag2 = flag;\n\t\tif (flag2)\n\t\t{\n\t\t\tbool flag3;\n\t\t\tswitch (cardModel.Pile?.Type)\n\t\t\t{\n\t\t\tcase PileType.Draw:\n\t\t\tcase PileType.Discard:\n\t\t\t\tflag3 = true;\n\t\t\t\tbreak;\n\t\t\tdefault:\n\t\t\t\tflag3 = false;\n\t\t\t\tbreak;\n\t\t\t}\n\t\t\tflag2 = flag3;\n\t\t}\n\t\tif (flag2)\n\t\t{\n\t\t\tawait CardPileCmd.Add(cardModel, PileType.Draw, CardPilePosition.Top);\n\t\t}\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars.Block.UpgradeValueBy(3m);\n\t}",
+      "originalCost": 1,
+      "pointCost": 6,
+      "portraitFrom": "CosmicIndifference",
+      "type": "Skill",
+      "rarity": "Common",
+      "target": "Self",
+      "gainsBlock": true,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new BlockVar(6m, ValueProp.Move)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: Block +3",
+        "vars": {
+          "Block": 3
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "CrashLandingFragment",
+      "name": "CrashLanding",
+      "id": "PARTSMITH-CRASH_LANDING_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "Crash Landing",
+      "titleZh": "迫降",
+      "description": "Deal {Damage:diff()} damage to ALL enemies.\nFill your [gold]Hand[/gold] with [gold]Debris[/gold].",
+      "descriptionZh": "对所有敌人造成{Damage:diff()}点伤害。\n用[gold]碎屑[/gold]填满你的[gold]手牌[/gold]。",
+      "onPlayCode": "{\n\t\tawait DamageCmd.Attack(base.DynamicVars.Damage.BaseValue).FromCard(this, cardPlay).TargetingAllOpponents(base.CombatState)\n\t\t\t.WithHitFx(\"vfx/vfx_heavy_blunt\", null, \"heavy_attack.mp3\")\n\t\t\t.WithHitVfxSpawnedAtBase()\n\t\t\t.Execute(choiceContext);\n\t\tint num = CardPile.MaxCardsInHand - CardPile.GetCards(base.Owner, PileType.Hand).Count();\n\t\tList<CardModel> list = new List<CardModel>();\n\t\tfor (int i = 0; i < num; i++)\n\t\t{\n\t\t\tlist.Add(base.CombatState.CreateCard<Debris>(base.Owner));\n\t\t}\n\t\tawait CardPileCmd.AddGeneratedCardsToCombat(list, PileType.Hand, base.Owner);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars.Damage.UpgradeValueBy(5m);\n\t}",
+      "originalCost": 1,
+      "pointCost": 8,
+      "portraitFrom": "CrashLanding",
+      "type": "Attack",
+      "rarity": "Rare",
+      "target": "AllEnemies",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new DamageVar(21m, ValueProp.Move)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: Damage +5",
+        "vars": {
+          "Damage": 5
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "CrescentSpearFragment",
+      "name": "CrescentSpear",
+      "id": "PARTSMITH-CRESCENT_SPEAR_FRAGMENT",
+      "starCost": 1,
+      "starCostX": false,
+      "title": "Crescent Spear",
+      "titleZh": "新月长矛",
+      "description": "Deal {CalculationBase:diff()} damage. Deals {ExtraDamage:diff()} additional damage for ALL your cards that have a {singleStarIcon} cost.",
+      "descriptionZh": "造成 {CalculationBase:diff()} 点伤害。你的每张拥有 {singleStarIcon} 费用的卡,都会使此牌额外造成 {ExtraDamage:diff()} 点伤害。",
+      "onPlayCode": "{\n\t\tArgumentNullException.ThrowIfNull(cardPlay.Target, \"cardPlay.Target\");\n\t\tawait DamageCmd.Attack(base.DynamicVars.CalculatedDamage).FromCard(this, cardPlay).Targeting(cardPlay.Target)\n\t\t\t.WithHitFx(\"vfx/vfx_starry_impact\")\n\t\t\t.Execute(choiceContext);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars.ExtraDamage.UpgradeValueBy(1m);\n\t}",
+      "originalCost": 1,
+      "pointCost": 6,
+      "portraitFrom": "CrescentSpear",
+      "type": "Attack",
+      "rarity": "Common",
+      "target": "AnyEnemy",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new CalculationBaseVar(8m)",
+        "new ExtraDamageVar(2m)",
+        "new CalculatedDamageVar(ValueProp.Move).WithMultiplier((CardModel card, Creature? _) => card.Owner.PlayerCombatState.AllCards.Count((CardModel c) => c.CanonicalStarCost >= 0 || c.HasStarCostX))"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: ExtraDamage +1",
+        "vars": {
+          "ExtraDamage": 1
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "CrushUnderFragment",
+      "name": "CrushUnder",
+      "id": "PARTSMITH-CRUSH_UNDER_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "Crush Under",
+      "titleZh": "下砸",
+      "description": "Deal {Damage:diff()} damage to ALL enemies. All enemies lose {StrengthLoss:diff()} [gold]Strength[/gold] this turn.",
+      "descriptionZh": "对所有敌人造成{Damage:diff()}点伤害。所有敌人在本回合失去{StrengthLoss:diff()}点[gold]力量[/gold]。",
+      "onPlayCode": "{\n\t\tawait CreatureCmd.TriggerAnim(base.Owner.Creature, \"Cast\", base.Owner.Character.AttackAnimDelay);\n\t\tIReadOnlyList<Creature> enemies = base.CombatState.HittableEnemies;\n\t\tforeach (Creature item in enemies)\n\t\t{\n\t\t\tNCombatRoom.Instance?.CombatVfxContainer.AddChildSafely(NSpikeSplashVfx.Create(item));\n\t\t}\n\t\tawait DamageCmd.Attack(base.DynamicVars.Damage.BaseValue).FromCard(this, cardPlay).TargetingAllOpponents(base.CombatState)\n\t\t\t.WithHitFx(\"vfx/vfx_heavy_blunt\", null, \"blunt_attack.mp3\")\n\t\t\t.WithHitVfxSpawnedAtBase()\n\t\t\t.Execute(choiceContext);\n\t\tawait PowerCmd.Apply<CrushUnderPower>(choiceContext, enemies, base.DynamicVars[\"StrengthLoss\"].BaseValue, base.Owner.Creature, this);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars.Damage.UpgradeValueBy(1m);\n\t\tbase.DynamicVars[\"StrengthLoss\"].UpgradeValueBy(1m);\n\t}",
+      "originalCost": 1,
+      "pointCost": 6,
+      "portraitFrom": "CrushUnder",
+      "type": "Attack",
+      "rarity": "Common",
+      "target": "AllEnemies",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new DamageVar(8m, ValueProp.Move)",
+        "new DynamicVar(\"StrengthLoss\", 1m)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: Damage +1, StrengthLoss +1",
+        "vars": {
+          "Damage": 1,
+          "StrengthLoss": 1
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "DecisionsDecisionsFragment",
+      "name": "DecisionsDecisions",
+      "id": "PARTSMITH-DECISIONS_DECISIONS_FRAGMENT",
+      "starCost": 6,
+      "starCostX": false,
+      "title": "Decisions, Decisions",
+      "titleZh": "抉择，抉择",
+      "description": "Draw {Cards:diff()} cards.\nChoose a Skill in your [gold]Hand[/gold] and play it {Repeat:diff()} times.",
+      "descriptionZh": "抽{Cards:diff()}张牌。\n选择你[gold]手牌[/gold]中的一张技能牌，并将其打出{Repeat:diff()}次。",
+      "onPlayCode": "{\n\t\tawait CreatureCmd.TriggerAnim(base.Owner.Creature, \"Cast\", base.Owner.Character.CastAnimDelay);\n\t\tawait CardPileCmd.Draw(choiceContext, base.DynamicVars.Cards.IntValue, base.Owner);\n\t\tCardSelectorPrefs prefs = new CardSelectorPrefs(base.SelectionScreenPrompt, 1)\n\t\t{\n\t\t\tPretendCardsCanBePlayed = true\n\t\t};\n\t\tCardModel card = (await CardSelectCmd.FromHand(choiceContext, base.Owner, prefs, (CardModel c) => c.Type == CardType.Skill && !c.Keywords.Contains(CardKeyword.Unplayable), this)).FirstOrDefault();\n\t\tif (card != null)\n\t\t{\n\t\t\tfor (int i = 0; i < base.DynamicVars.Repeat.IntValue; i++)\n\t\t\t{\n\t\t\t\tawait CardCmd.AutoPlay(choiceContext, card, null);\n\t\t\t}\n\t\t}\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars.Cards.UpgradeValueBy(2m);\n\t}",
+      "originalCost": 0,
+      "pointCost": 5,
+      "portraitFrom": "DecisionsDecisions",
+      "type": "Skill",
+      "rarity": "Rare",
+      "target": "Self",
+      "gainsBlock": null,
+      "keywords": [
+        "Exhaust"
+      ],
+      "tags": [],
+      "dynamicVars": [
+        "new CardsVar(3)",
+        "new RepeatVar(3)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: Cards +2",
+        "vars": {
+          "Cards": 2
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "DevastateFragment",
+      "name": "Devastate",
+      "id": "PARTSMITH-DEVASTATE_FRAGMENT",
+      "starCost": 4,
+      "starCostX": false,
+      "title": "Devastate",
+      "titleZh": "葬送",
+      "description": "Deal {Damage:diff()} damage.",
+      "descriptionZh": "造成{Damage:diff()}点伤害。",
+      "onPlayCode": "{\n\t\tArgumentNullException.ThrowIfNull(cardPlay.Target, \"cardPlay.Target\");\n\t\tawait DamageCmd.Attack(base.DynamicVars.Damage.BaseValue).FromCard(this, cardPlay).Targeting(cardPlay.Target)\n\t\t\t.WithHitFx(\"vfx/vfx_attack_blunt\", null, \"blunt_attack.mp3\")\n\t\t\t.Execute(choiceContext);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars.Damage.UpgradeValueBy(10m);\n\t}",
+      "originalCost": 1,
+      "pointCost": 7,
+      "portraitFrom": "Devastate",
+      "type": "Attack",
+      "rarity": "Uncommon",
+      "target": "AnyEnemy",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new DamageVar(35m, ValueProp.Move)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: Damage +10",
+        "vars": {
+          "Damage": 10
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "DyingStarFragment",
+      "name": "DyingStar",
+      "id": "PARTSMITH-DYING_STAR_FRAGMENT",
+      "starCost": 3,
+      "starCostX": false,
+      "title": "Dying Star",
+      "titleZh": "星灭",
+      "description": "Deal {Damage:diff()} damage to ALL enemies. ALL enemies lose {StrengthLoss:diff()} [gold]Strength[/gold] this turn.",
+      "descriptionZh": "对所有敌人造成{Damage:diff()}点伤害。所有敌人在本回合中失去{StrengthLoss:diff()}点[gold]力量[/gold]。",
+      "onPlayCode": "{\n\t\tawait CreatureCmd.TriggerAnim(base.Owner.Creature, \"Attack\", base.Owner.Character.AttackAnimDelay);\n\t\tIReadOnlyList<Creature> enemies = base.CombatState.HittableEnemies;\n\t\tawait DamageCmd.Attack(base.DynamicVars.Damage.BaseValue).FromCard(this, cardPlay).TargetingAllOpponents(base.CombatState)\n\t\t\t.WithHitFx(\"vfx/vfx_starry_impact\")\n\t\t\t.SpawningHitVfxOnEachCreature()\n\t\t\t.Execute(choiceContext);\n\t\tforeach (Creature enemy in enemies)\n\t\t{\n\t\t\tawait PowerCmd.Apply<DyingStarPower>(choiceContext, enemy, base.DynamicVars[\"StrengthLoss\"].BaseValue, base.Owner.Creature, this);\n\t\t\tVfxCmd.PlayOnCreature(enemy, \"vfx/vfx_attack_slash\");\n\t\t}\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars.Damage.UpgradeValueBy(2m);\n\t\tbase.DynamicVars[\"StrengthLoss\"].UpgradeValueBy(2m);\n\t}",
+      "originalCost": 1,
+      "pointCost": 8,
+      "portraitFrom": "DyingStar",
+      "type": "Attack",
+      "rarity": "Rare",
+      "target": "AllEnemies",
+      "gainsBlock": null,
+      "keywords": [
+        "Ethereal"
+      ],
+      "tags": [],
+      "dynamicVars": [
+        "new DamageVar(9m, ValueProp.Move)",
+        "new DynamicVar(\"StrengthLoss\", 9m)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: Damage +2, StrengthLoss +2",
+        "vars": {
+          "Damage": 2,
+          "StrengthLoss": 2
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "ForegoneConclusionFragment",
+      "name": "ForegoneConclusion",
+      "id": "PARTSMITH-FOREGONE_CONCLUSION_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "Foregone Conclusion",
+      "titleZh": "既定事项",
+      "description": "Next turn, put {Cards:diff()} cards from your [gold]Draw Pile[/gold] into your [gold]Hand[/gold].",
+      "descriptionZh": "在下个回合，从你的[gold]抽牌堆[/gold]中选择{Cards:diff()}张牌放入你的[gold]手牌[/gold]。",
+      "onPlayCode": "{\n\t\tawait CreatureCmd.TriggerAnim(base.Owner.Creature, \"Cast\", base.Owner.Character.CastAnimDelay);\n\t\tawait PowerCmd.Apply<ForegoneConclusionPower>(choiceContext, base.Owner.Creature, base.DynamicVars.Cards.BaseValue, base.Owner.Creature, this);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars.Cards.UpgradeValueBy(1m);\n\t}",
+      "originalCost": 1,
+      "pointCost": 8,
+      "portraitFrom": "ForegoneConclusion",
+      "type": "Skill",
+      "rarity": "Rare",
+      "target": "Self",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new CardsVar(2)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: Cards +1",
+        "vars": {
+          "Cards": 1
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "FurnaceFragment",
+      "name": "Furnace",
+      "id": "PARTSMITH-FURNACE_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "Furnace",
+      "titleZh": "熔炉",
+      "description": "At the start of your turn, [gold]Forge[/gold] {Forge:diff()}.",
+      "descriptionZh": "在你的回合开始时，[gold]铸造[/gold]{Forge:diff()}。",
+      "onPlayCode": "{\n\t\tawait CreatureCmd.TriggerAnim(base.Owner.Creature, \"PowerUp\", base.Owner.Character.PowerUpAnimDelay);\n\t\tawait PowerCmd.Apply<FurnacePower>(choiceContext, base.Owner.Creature, base.DynamicVars.Forge.BaseValue, base.Owner.Creature, this);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars.Forge.UpgradeValueBy(2m);\n\t}",
+      "originalCost": 1,
+      "pointCost": 7,
+      "portraitFrom": "Furnace",
+      "type": "Power",
+      "rarity": "Uncommon",
+      "target": "Self",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new ForgeVar(5)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: Forge +2",
+        "vars": {
+          "Forge": 2
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "GammaBlastFragment",
+      "name": "GammaBlast",
+      "id": "PARTSMITH-GAMMA_BLAST_FRAGMENT",
+      "starCost": 3,
+      "starCostX": false,
+      "title": "Gamma Blast",
+      "titleZh": "伽马爆破",
+      "description": "Deal {Damage:diff()} damage.\nApply {WeakPower:diff()} [gold]Weak[/gold].\nApply {VulnerablePower:diff()} [gold]Vulnerable[/gold].",
+      "descriptionZh": "造成{Damage:diff()}点伤害。\n给予{WeakPower:diff()}层[gold]虚弱[/gold]。\n给予{VulnerablePower:diff()}层[gold]易伤[/gold]。",
+      "onPlayCode": "{\n\t\tArgumentNullException.ThrowIfNull(cardPlay.Target, \"cardPlay.Target\");\n\t\tawait DamageCmd.Attack(base.DynamicVars.Damage.BaseValue).FromCard(this, cardPlay).Targeting(cardPlay.Target)\n\t\t\t.WithHitFx(\"vfx/vfx_giant_horizontal_slash\")\n\t\t\t.Execute(choiceContext);\n\t\tawait PowerCmd.Apply<WeakPower>(choiceContext, cardPlay.Target, base.DynamicVars.Weak.BaseValue, base.Owner.Creature, this);\n\t\tawait PowerCmd.Apply<VulnerablePower>(choiceContext, cardPlay.Target, base.DynamicVars.Vulnerable.BaseValue, base.Owner.Creature, this);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars.Damage.UpgradeValueBy(5m);\n\t}",
+      "originalCost": 0,
+      "pointCost": 4,
+      "portraitFrom": "GammaBlast",
+      "type": "Attack",
+      "rarity": "Uncommon",
+      "target": "AnyEnemy",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new DamageVar(13m, ValueProp.Move)",
+        "new PowerVar<VulnerablePower>(2m)",
+        "new PowerVar<WeakPower>(2m)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: Damage +5",
+        "vars": {
+          "Damage": 5
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "GatherLightFragment",
+      "name": "GatherLight",
+      "id": "PARTSMITH-GATHER_LIGHT_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "Gather Light",
+      "titleZh": "收集光辉",
+      "description": "Gain {Block:diff()} [gold]Block[/gold].\nGain {Stars:starIcons()}.",
+      "descriptionZh": "获得{Block:diff()}点[gold]格挡[/gold]。\n获得{Stars:starIcons()}。",
+      "onPlayCode": "{\n\t\tawait CreatureCmd.GainBlock(base.Owner.Creature, base.DynamicVars.Block, cardPlay);\n\t\tawait PlayerCmd.GainStars(base.DynamicVars.Stars.BaseValue, base.Owner);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars.Block.UpgradeValueBy(3m);\n\t}",
+      "originalCost": 1,
+      "pointCost": 6,
+      "portraitFrom": "GatherLight",
+      "type": "Skill",
+      "rarity": "Common",
+      "target": "Self",
+      "gainsBlock": true,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new BlockVar(8m, ValueProp.Move)",
+        "new StarsVar(1)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: Block +3",
+        "vars": {
+          "Block": 3
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "GenesisFragment",
+      "name": "Genesis",
+      "id": "PARTSMITH-GENESIS_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "Genesis",
+      "titleZh": "创世纪",
+      "description": "At the start of your turn, gain {StarsPerTurn:starIcons()}.",
+      "descriptionZh": "在你的回合开始时，获得{StarsPerTurn:starIcons()}。",
+      "onPlayCode": "{\n\t\tawait CreatureCmd.TriggerAnim(base.Owner.Creature, \"PowerUp\", base.Owner.Character.PowerUpAnimDelay);\n\t\tawait PowerCmd.Apply<GenesisPower>(choiceContext, base.Owner.Creature, base.DynamicVars[\"StarsPerTurn\"].BaseValue, base.Owner.Creature, this);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars[\"StarsPerTurn\"].UpgradeValueBy(1m);\n\t}",
+      "originalCost": 2,
+      "pointCost": 12,
+      "portraitFrom": "Genesis",
+      "type": "Power",
+      "rarity": "Rare",
+      "target": "Self",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new DynamicVar(\"StarsPerTurn\", 2m)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: StarsPerTurn +1",
+        "vars": {
+          "StarsPerTurn": 1
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "GlimmerFragment",
+      "name": "Glimmer",
+      "id": "PARTSMITH-GLIMMER_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "Glimmer",
+      "titleZh": "微光",
+      "description": "Draw {Cards:diff()} {Cards:plural:card|cards}.\nPut {PutBack:diff()} {PutBack:plural:card|cards} from your [gold]Hand[/gold] on top of your [gold]Draw Pile[/gold].",
+      "descriptionZh": "抽{Cards:diff()}张牌。\n将你[gold]手牌[/gold]中的{PutBack:diff()}张牌放到[gold]抽牌堆[/gold]顶部。",
+      "onPlayCode": "{\n\t\tawait CardPileCmd.Draw(choiceContext, base.DynamicVars.Cards.BaseValue, base.Owner);\n\t\tCardModel[] array = (await CardSelectCmd.FromHand(prefs: new CardSelectorPrefs(base.SelectionScreenPrompt, base.DynamicVars[\"PutBack\"].IntValue), context: choiceContext, player: base.Owner, filter: null, source: this)).ToArray();\n\t\tif (array.Length != 0)\n\t\t{\n\t\t\tawait CardPileCmd.Add(array, PileType.Draw, CardPilePosition.Top);\n\t\t}\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars.Cards.UpgradeValueBy(1m);\n\t}",
+      "originalCost": 1,
+      "pointCost": 7,
+      "portraitFrom": "Glimmer",
+      "type": "Skill",
+      "rarity": "Uncommon",
+      "target": "Self",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new CardsVar(3)",
+        "new DynamicVar(\"PutBack\", 1m)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: Cards +1",
+        "vars": {
+          "Cards": 1
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "GlitterstreamFragment",
+      "name": "Glitterstream",
+      "id": "PARTSMITH-GLITTERSTREAM_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "Glitterstream",
+      "titleZh": "流光溢彩",
+      "description": "Gain {Block:diff()} [gold]Block[/gold].\nNext turn, gain {BlockNextTurn:diff()} [gold]Block[/gold].",
+      "descriptionZh": "获得{Block:diff()}点[gold]格挡[/gold]。\n在下一回合获得{BlockNextTurn:diff()}点[gold]格挡[/gold]。",
+      "onPlayCode": "{\n\t\tawait CreatureCmd.TriggerAnim(base.Owner.Creature, \"Cast\", base.Owner.Character.CastAnimDelay);\n\t\tBlockVar blockVar = (BlockVar)base.DynamicVars[\"BlockNextTurn\"];\n\t\tdecimal blockNextTurnAmount = Hook.ModifyBlock(base.CombatState, base.Owner.Creature, blockVar.BaseValue, blockVar.Props, this, cardPlay, out IEnumerable<AbstractModel> _);\n\t\tawait CreatureCmd.GainBlock(base.Owner.Creature, base.DynamicVars.Block, cardPlay);\n\t\tawait PowerCmd.Apply<BlockNextTurnPower>(choiceContext, base.Owner.Creature, blockNextTurnAmount, base.Owner.Creature, this);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars.Block.UpgradeValueBy(2m);\n\t\tbase.DynamicVars[\"BlockNextTurn\"].UpgradeValueBy(2m);\n\t}",
+      "originalCost": 2,
+      "pointCost": 10,
+      "portraitFrom": "Glitterstream",
+      "type": "Skill",
+      "rarity": "Common",
+      "target": "Self",
+      "gainsBlock": true,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new BlockVar(11m, ValueProp.Move)",
+        "new BlockVar(\"BlockNextTurn\", 5m, ValueProp.Move)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: Block +2, BlockNextTurn +2",
+        "vars": {
+          "Block": 2,
+          "BlockNextTurn": 2
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "GlowFragment",
+      "name": "Glow",
+      "id": "PARTSMITH-GLOW_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "Glow",
+      "titleZh": "辉光",
+      "description": "Gain {Stars:starIcons()}.\nDraw {Cards:diff()} {Cards:plural:card|cards}.\nNext turn, draw {Cards:diff()} {Cards:plural:card|cards}.",
+      "descriptionZh": "获得{Stars:starIcons()}。\n抽{Cards:diff()}张牌。\n下一回合抽{Cards:diff()}张牌{Cards:plural:|}。",
+      "onPlayCode": "{\n\t\tawait CreatureCmd.TriggerAnim(base.Owner.Creature, \"Cast\", base.Owner.Character.CastAnimDelay);\n\t\tawait PlayerCmd.GainStars(base.DynamicVars.Stars.BaseValue, base.Owner);\n\t\tawait CardPileCmd.Draw(choiceContext, base.DynamicVars.Cards.BaseValue, base.Owner);\n\t\tawait PowerCmd.Apply<DrawCardsNextTurnPower>(choiceContext, base.Owner.Creature, base.DynamicVars.Cards.BaseValue, base.Owner.Creature, this);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars.Stars.UpgradeValueBy(1m);\n\t}",
+      "originalCost": 1,
+      "pointCost": 6,
+      "portraitFrom": "Glow",
+      "type": "Skill",
+      "rarity": "Common",
+      "target": "Self",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new StarsVar(1)",
+        "new CardsVar(1)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: Stars +1",
+        "vars": {
+          "Stars": 1
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "GuardsFragment",
+      "name": "Guards",
+      "id": "PARTSMITH-GUARDS_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "GUARDS!!!",
+      "titleZh": "护驾！！！",
+      "description": "[gold]Transform[/gold] any number of cards in your [gold]Hand[/gold] into [gold]{IfUpgraded:show:Minion Sacrifice+|Minion Sacrifice}[/gold].",
+      "descriptionZh": "将你[gold]手牌[/gold]中的任意张牌[gold]变化[/gold]为[gold]{IfUpgraded:show:仆从捐躯+|仆从捐躯}[/gold]。",
+      "onPlayCode": "{\n\t\tawait CreatureCmd.TriggerAnim(base.Owner.Creature, \"Cast\", base.Owner.Character.CastAnimDelay);\n\t\tList<CardModel> list = (await CardSelectCmd.FromHand(prefs: new CardSelectorPrefs(base.SelectionScreenPrompt, 0, 999999999), context: choiceContext, player: base.Owner, filter: null, source: this)).ToList();\n\t\tforeach (CardModel item in list)\n\t\t{\n\t\t\tCardModel cardModel = base.CombatState.CreateCard<MinionSacrifice>(base.Owner);\n\t\t\tif (base.IsUpgraded)\n\t\t\t{\n\t\t\t\tCardCmd.Upgrade(cardModel);\n\t\t\t}\n\t\t\tawait CardCmd.Transform(item, cardModel);\n\t\t}\n\t}",
+      "onUpgradeCode": null,
+      "originalCost": 2,
+      "pointCost": 12,
+      "portraitFrom": "Guards",
+      "type": "Skill",
+      "rarity": "Rare",
+      "target": "Self",
+      "gainsBlock": null,
+      "keywords": [
+        "Exhaust"
+      ],
+      "tags": [],
+      "dynamicVars": [],
+      "upgrade": {
+        "summary": "Upgrade: ",
+        "vars": {},
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "GuidingStarFragment",
+      "name": "GuidingStar",
+      "id": "PARTSMITH-GUIDING_STAR_FRAGMENT",
+      "starCost": 2,
+      "starCostX": false,
+      "title": "Guiding Star",
+      "titleZh": "引导之星",
+      "description": "Deal {Damage:diff()} damage.\nDraw {Cards:diff()} {Cards:plural:card|cards}.",
+      "descriptionZh": "造成{Damage:diff()}点伤害。\n抽{Cards:diff()}张牌。",
+      "onPlayCode": "{\n\t\tArgumentNullException.ThrowIfNull(cardPlay.Target, \"cardPlay.Target\");\n\t\tawait CreatureCmd.TriggerAnim(base.Owner.Creature, \"Cast\", base.Owner.Character.CastAnimDelay);\n\t\tNCreature nCreature = NCombatRoom.Instance?.GetCreatureNode(cardPlay.Target);\n\t\tif (nCreature != null)\n\t\t{\n\t\t\tSfxCmd.Play(\"event:/sfx/characters/regent/regent_guiding_star\");\n\t\t\tNSmallMagicMissileVfx nSmallMagicMissileVfx = NSmallMagicMissileVfx.Create(nCreature.GetBottomOfHitbox(), new Color(\"50b598\"));\n\t\t\tNCombatRoom.Instance.CombatVfxContainer.AddChildSafely(nSmallMagicMissileVfx);\n\t\t\tawait Cmd.Wait(nSmallMagicMissileVfx.WaitTime);\n\t\t}\n\t\tawait DamageCmd.Attack(base.DynamicVars.Damage.BaseValue).WithNoAttackerAnim().FromCard(this, cardPlay)\n\t\t\t.Targeting(cardPlay.Target)\n\t\t\t.Execute(choiceContext);\n\t\tawait CardPileCmd.Draw(choiceContext, base.DynamicVars.Cards.BaseValue, base.Owner);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars.Damage.UpgradeValueBy(1m);\n\t\tbase.DynamicVars.Cards.UpgradeValueBy(1m);\n\t}",
+      "originalCost": 1,
+      "pointCost": 6,
+      "portraitFrom": "GuidingStar",
+      "type": "Attack",
+      "rarity": "Common",
+      "target": "AnyEnemy",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new DamageVar(12m, ValueProp.Move)",
+        "new CardsVar(2)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: Cards +1, Damage +1",
+        "vars": {
+          "Damage": 1,
+          "Cards": 1
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "HeavenlyDrillFragment",
+      "name": "HeavenlyDrill",
+      "id": "PARTSMITH-HEAVENLY_DRILL_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "Heavenly Drill",
+      "titleZh": "天际钻头",
+      "description": "Deal {Damage:diff()} damage X times.\nDouble X if it's {Energy:diff()} or more.",
+      "descriptionZh": "造成{Damage:diff()}点伤害X次。\n如果X的最终数值为{Energy:diff()}或以上，则将X的数值翻倍。",
+      "onPlayCode": "{\n\t\tArgumentNullException.ThrowIfNull(cardPlay.Target, \"cardPlay.Target\");\n\t\tint num = ResolveEnergyXValue();\n\t\tif (num >= base.DynamicVars.Energy.IntValue)\n\t\t{\n\t\t\tnum *= 2;\n\t\t}\n\t\tawait DamageCmd.Attack(base.DynamicVars.Damage.BaseValue).WithHitCount(num).FromCard(this, cardPlay)\n\t\t\t.Targeting(cardPlay.Target)\n\t\t\t.WithHitFx(\"vfx/vfx_giant_horizontal_slash\", null, \"slash_attack.mp3\")\n\t\t\t.Execute(choiceContext);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars.Damage.UpgradeValueBy(2m);\n\t}",
+      "originalCost": 0,
+      "pointCost": 5,
+      "portraitFrom": "HeavenlyDrill",
+      "type": "Attack",
+      "rarity": "Rare",
+      "target": "AnyEnemy",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new DamageVar(8m, ValueProp.Move)",
+        "new EnergyVar(4)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: Damage +2",
+        "vars": {
+          "Damage": 2
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "HegemonyFragment",
+      "name": "Hegemony",
+      "id": "PARTSMITH-HEGEMONY_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "Hegemony",
+      "titleZh": "霸权",
+      "description": "Deal {Damage:diff()} damage.\nNext turn, gain {Energy:energyIcons()}.",
+      "descriptionZh": "造成{Damage:diff()}点伤害。\n在下个回合获得{Energy:energyIcons()}。",
+      "onPlayCode": "{\n\t\tArgumentNullException.ThrowIfNull(cardPlay.Target, \"cardPlay.Target\");\n\t\tawait DamageCmd.Attack(base.DynamicVars.Damage.BaseValue).FromCard(this, cardPlay).Targeting(cardPlay.Target)\n\t\t\t.WithHitFx(\"vfx/vfx_attack_slash\", null, \"blunt_attack.mp3\")\n\t\t\t.Execute(choiceContext);\n\t\tawait PowerCmd.Apply<EnergyNextTurnPower>(choiceContext, base.Owner.Creature, base.DynamicVars.Energy.IntValue, base.Owner.Creature, this);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars.Damage.UpgradeValueBy(3m);\n\t\tbase.DynamicVars.Energy.UpgradeValueBy(1m);\n\t}",
+      "originalCost": 2,
+      "pointCost": 11,
+      "portraitFrom": "Hegemony",
+      "type": "Attack",
+      "rarity": "Uncommon",
+      "target": "AnyEnemy",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new DamageVar(15m, ValueProp.Move)",
+        "new EnergyVar(2)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: Damage +3, Energy +1",
+        "vars": {
+          "Damage": 3,
+          "Energy": 1
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "HeirloomHammerFragment",
+      "name": "HeirloomHammer",
+      "id": "PARTSMITH-HEIRLOOM_HAMMER_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "Heirloom Hammer",
+      "titleZh": "传承之锤",
+      "description": "Deal {Damage:diff()} damage.\nChoose a Colorless card in your [gold]Hand[/gold]. Add a copy of that card into your [gold]Hand[/gold].",
+      "descriptionZh": "造成{Damage:diff()}点伤害。\n选择你[gold]手牌[/gold]中的一张无色牌。将这张牌的一张复制品放入你的[gold]手牌[/gold]。",
+      "onPlayCode": "{\n\t\tArgumentNullException.ThrowIfNull(cardPlay.Target, \"cardPlay.Target\");\n\t\tawait DamageCmd.Attack(base.DynamicVars.Damage.BaseValue).FromCard(this, cardPlay).Targeting(cardPlay.Target)\n\t\t\t.WithHitFx(\"vfx/vfx_attack_blunt\", null, \"blunt_attack.mp3\")\n\t\t\t.Execute(choiceContext);\n\t\tCardModel selection = (await CardSelectCmd.FromHand(prefs: new CardSelectorPrefs(base.SelectionScreenPrompt, 1), context: choiceContext, player: base.Owner, filter: (CardModel c) => c.VisualCardPool.IsColorless, source: this)).FirstOrDefault();\n\t\tif (selection != null)\n\t\t{\n\t\t\tfor (int i = 0; i < base.DynamicVars.Repeat.IntValue; i++)\n\t\t\t{\n\t\t\t\tCardModel card = selection.CreateClone();\n\t\t\t\tawait CardPileCmd.AddGeneratedCardToCombat(card, PileType.Hand, base.Owner);\n\t\t\t}\n\t\t}\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars.Damage.UpgradeValueBy(5m);\n\t}",
+      "originalCost": 2,
+      "pointCost": 12,
+      "portraitFrom": "HeirloomHammer",
+      "type": "Attack",
+      "rarity": "Rare",
+      "target": "AnyEnemy",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new DamageVar(20m, ValueProp.Move)",
+        "new RepeatVar(1)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: Damage +5",
+        "vars": {
+          "Damage": 5
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "HiddenCacheFragment",
+      "name": "HiddenCache",
+      "id": "PARTSMITH-HIDDEN_CACHE_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "Hidden Cache",
+      "titleZh": "隐秘藏品",
+      "description": "Gain {Stars:starIcons()}.\nNext turn, gain {StarNextTurnPower:starIcons()}.",
+      "descriptionZh": "获得{Stars:starIcons()}。\n在下个回合获得{StarNextTurnPower:starIcons()}。",
+      "onPlayCode": "{\n\t\tawait CreatureCmd.TriggerAnim(base.Owner.Creature, \"Cast\", base.Owner.Character.CastAnimDelay);\n\t\tawait PlayerCmd.GainStars(base.DynamicVars.Stars.BaseValue, base.Owner);\n\t\tawait PowerCmd.Apply<StarNextTurnPower>(choiceContext, base.Owner.Creature, base.DynamicVars[\"StarNextTurnPower\"].BaseValue, base.Owner.Creature, this);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars[\"StarNextTurnPower\"].UpgradeValueBy(1m);\n\t}",
+      "originalCost": 1,
+      "pointCost": 6,
+      "portraitFrom": "HiddenCache",
+      "type": "Skill",
+      "rarity": "Common",
+      "target": "Self",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new StarsVar(1)",
+        "new PowerVar<StarNextTurnPower>(3m)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: StarNextTurnPower +1",
+        "vars": {
+          "StarNextTurnPower": 1
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "IAmInvincibleFragment",
+      "name": "IAmInvincible",
+      "id": "PARTSMITH-I_AM_INVINCIBLE_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "I Am Invincible",
+      "titleZh": "所向无敌",
+      "description": "Gain {Block:diff()} Block.",
+      "descriptionZh": "获得 {Block:diff()} 点格挡。",
+      "onPlayCode": "{\n\t\tawait CreatureCmd.GainBlock(base.Owner.Creature, base.DynamicVars.Block, cardPlay);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars.Block.UpgradeValueBy(3m);\n\t}",
+      "originalCost": 1,
+      "pointCost": 8,
+      "portraitFrom": "IAmInvincible",
+      "type": "Skill",
+      "rarity": "Rare",
+      "target": "Self",
+      "gainsBlock": true,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new BlockVar(10m, ValueProp.Move)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: Block +3",
+        "vars": {
+          "Block": 3
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "KinglyKickFragment",
+      "name": "KinglyKick",
+      "id": "PARTSMITH-KINGLY_KICK_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "Kingly Kick",
+      "titleZh": "王者之踢",
+      "description": "Deal {Damage:diff()} damage.",
+      "descriptionZh": "造成 {Damage:diff()} 点伤害。",
+      "onPlayCode": "{\n\t\tArgumentNullException.ThrowIfNull(cardPlay.Target, \"cardPlay.Target\");\n\t\tawait DamageCmd.Attack(base.DynamicVars.Damage.BaseValue).FromCard(this, cardPlay).Targeting(cardPlay.Target)\n\t\t\t.WithHitFx(\"vfx/vfx_attack_slash\", null, \"heavy_attack.mp3\")\n\t\t\t.Execute(choiceContext);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars.Damage.UpgradeValueBy(8m);\n\t}",
+      "originalCost": 4,
+      "pointCost": null,
+      "portraitFrom": "KinglyKick",
+      "type": "Attack",
+      "rarity": "Uncommon",
+      "target": "AnyEnemy",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new DamageVar(27m, ValueProp.Move)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: Damage +8",
+        "vars": {
+          "Damage": 8
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "KinglyPunchFragment",
+      "name": "KinglyPunch",
+      "id": "PARTSMITH-KINGLY_PUNCH_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "Kingly Punch",
+      "titleZh": "王者之拳",
+      "description": "Deal {Damage:diff()} damage.",
+      "descriptionZh": "造成 {Damage:diff()} 点伤害。",
+      "onPlayCode": "{\n\t\tArgumentNullException.ThrowIfNull(cardPlay.Target, \"cardPlay.Target\");\n\t\tawait DamageCmd.Attack(base.DynamicVars.Damage.BaseValue).FromCard(this, cardPlay).Targeting(cardPlay.Target)\n\t\t\t.WithHitFx(\"vfx/vfx_attack_slash\")\n\t\t\t.Execute(choiceContext);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars.Damage.UpgradeValueBy(2m);\n\t\tbase.DynamicVars[\"Increase\"].UpgradeValueBy(2m);\n\t}",
+      "originalCost": 1,
+      "pointCost": 7,
+      "portraitFrom": "KinglyPunch",
+      "type": "Attack",
+      "rarity": "Uncommon",
+      "target": "AnyEnemy",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new DamageVar(8m, ValueProp.Move)",
+        "new DynamicVar(\"Increase\", 4m)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: Damage +2, Increase +2",
+        "vars": {
+          "Damage": 2,
+          "Increase": 2
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "KnockoutBlowFragment",
+      "name": "KnockoutBlow",
+      "id": "PARTSMITH-KNOCKOUT_BLOW_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "Knockout Blow",
+      "titleZh": "决胜一击",
+      "description": "Deal {Damage:diff()} damage.\nIf this kills an enemy, gain {Stars:starIcons()}.",
+      "descriptionZh": "造成{Damage:diff()}点伤害。\n如果此牌击杀了敌人，获得{Stars:starIcons()}。",
+      "onPlayCode": "{\n\t\tArgumentNullException.ThrowIfNull(cardPlay.Target, \"cardPlay.Target\");\n\t\tif ((await DamageCmd.Attack(base.DynamicVars.Damage.BaseValue).FromCard(this, cardPlay).Targeting(cardPlay.Target)\n\t\t\t.WithHitFx(\"vfx/vfx_attack_blunt\", null, \"blunt_attack.mp3\")\n\t\t\t.Execute(choiceContext)).Results.SelectMany((List<DamageResult> r) => r).Any((DamageResult r) => r.WasTargetKilled))\n\t\t{\n\t\t\tawait PlayerCmd.GainStars(base.DynamicVars.Stars.BaseValue, base.Owner);\n\t\t}\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars.Damage.UpgradeValueBy(8m);\n\t}",
+      "originalCost": 3,
+      "pointCost": 16,
+      "portraitFrom": "KnockoutBlow",
+      "type": "Attack",
+      "rarity": "Uncommon",
+      "target": "AnyEnemy",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new DamageVar(30m, ValueProp.Move)",
+        "new StarsVar(5)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: Damage +8",
+        "vars": {
+          "Damage": 8
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "KnowThyPlaceFragment",
+      "name": "KnowThyPlace",
+      "id": "PARTSMITH-KNOW_THY_PLACE_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "Know Thy Place",
+      "titleZh": "何人僭越",
+      "description": "Apply {WeakPower:diff()} [gold]Weak[/gold].\nApply {VulnerablePower:diff()} [gold]Vulnerable[/gold].",
+      "descriptionZh": "给予{WeakPower:diff()}层[gold]虚弱[/gold]。\n给予{VulnerablePower:diff()}层[gold]易伤[/gold]。",
+      "onPlayCode": "{\n\t\tArgumentNullException.ThrowIfNull(cardPlay.Target, \"cardPlay.Target\");\n\t\tawait CreatureCmd.TriggerAnim(base.Owner.Creature, \"Cast\", base.Owner.Character.CastAnimDelay);\n\t\tawait PowerCmd.Apply<WeakPower>(choiceContext, cardPlay.Target, base.DynamicVars.Weak.BaseValue, base.Owner.Creature, this);\n\t\tawait PowerCmd.Apply<VulnerablePower>(choiceContext, cardPlay.Target, base.DynamicVars.Vulnerable.BaseValue, base.Owner.Creature, this);\n\t}",
+      "onUpgradeCode": "{\n\t\tRemoveKeyword(CardKeyword.Exhaust);\n\t}",
+      "originalCost": 0,
+      "pointCost": 3,
+      "portraitFrom": "KnowThyPlace",
+      "type": "Skill",
+      "rarity": "Common",
+      "target": "AnyEnemy",
+      "gainsBlock": null,
+      "keywords": [
+        "Exhaust"
+      ],
+      "tags": [],
+      "dynamicVars": [
+        "new PowerVar<WeakPower>(1m)",
+        "new PowerVar<VulnerablePower>(1m)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: remove Exhaust",
+        "vars": {},
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [
+          "Exhaust"
+        ],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "LunarBlastFragment",
+      "name": "LunarBlast",
+      "id": "PARTSMITH-LUNAR_BLAST_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "Lunar Blast",
+      "titleZh": "月面射击",
+      "description": "Deal {Damage:diff()} damage for each Skill already played this turn.",
+      "descriptionZh": "本回合每打出一张技能牌,造成 {Damage:diff()} 点伤害。",
+      "onPlayCode": "{\n\t\tArgumentNullException.ThrowIfNull(cardPlay.Target, \"cardPlay.Target\");\n\t\tawait DamageCmd.Attack(base.DynamicVars.Damage.BaseValue).WithHitCount((int)((CalculatedVar)base.DynamicVars[\"CalculatedHits\"]).Calculate(cardPlay.Target)).FromCard(this, cardPlay)\n\t\t\t.Targeting(cardPlay.Target)\n\t\t\t.WithHitFx(\"vfx/vfx_attack_blunt\", null, \"blunt_attack.mp3\")\n\t\t\t.Execute(choiceContext);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars.Damage.UpgradeValueBy(1m);\n\t}",
+      "originalCost": 0,
+      "pointCost": 4,
+      "portraitFrom": "LunarBlast",
+      "type": "Attack",
+      "rarity": "Uncommon",
+      "target": "AnyEnemy",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new DamageVar(4m, ValueProp.Move)",
+        "new CalculationBaseVar(0m)",
+        "new CalculationExtraVar(1m)",
+        "new CalculatedVar(\"CalculatedHits\").WithMultiplier((CardModel card, Creature? _) => CombatManager.Instance.History.CardPlaysFinished.Count((CardPlayFinishedEntry e) => e.HappenedThisTurn(card.CombatState) && e.CardPlay.Card.Type == CardType.Skill && e.CardPlay.Player == card.Owner))"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: Damage +1",
+        "vars": {
+          "Damage": 1
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "MakeItSoFragment",
+      "name": "MakeItSo",
+      "id": "PARTSMITH-MAKE_IT_SO_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "Make It So",
+      "titleZh": "如此甚好",
+      "description": "Deal {Damage:diff()} damage.",
+      "descriptionZh": "造成 {Damage:diff()} 点伤害。",
+      "onPlayCode": "{\n\t\tArgumentNullException.ThrowIfNull(cardPlay.Target, \"cardPlay.Target\");\n\t\tawait DamageCmd.Attack(base.DynamicVars.Damage.BaseValue).FromCard(this, cardPlay).Targeting(cardPlay.Target)\n\t\t\t.WithHitFx(\"vfx/vfx_starry_impact\")\n\t\t\t.Execute(choiceContext);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars.Damage.UpgradeValueBy(3m);\n\t}",
+      "originalCost": 0,
+      "pointCost": 5,
+      "portraitFrom": "MakeItSo",
+      "type": "Attack",
+      "rarity": "Rare",
+      "target": "AnyEnemy",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new DamageVar(6m, ValueProp.Move)",
+        "new CardsVar(3)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: Damage +3",
+        "vars": {
+          "Damage": 3
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "ManifestAuthorityFragment",
+      "name": "ManifestAuthority",
+      "id": "PARTSMITH-MANIFEST_AUTHORITY_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "Manifest Authority",
+      "titleZh": "君权自授",
+      "description": "Gain {Block:diff()} [gold]Block[/gold].\nAdd 1 random{IfUpgraded:show: [gold]Upgraded[/gold]} Colorless card into your [gold]Hand[/gold].",
+      "descriptionZh": "获得{Block:diff()}点[gold]格挡[/gold]。\n将一张随机{IfUpgraded:show:[gold]升级过的[/gold]}无色牌加入你的[gold]手牌[/gold]。",
+      "onPlayCode": "{\n\t\tawait CreatureCmd.GainBlock(base.Owner.Creature, base.DynamicVars.Block, cardPlay);\n\t\tCardModel cardModel = CardFactory.GetDistinctForCombat(base.Owner, ModelDb.CardPool<ColorlessCardPool>().GetUnlockedCards(base.Owner.UnlockState, base.Owner.RunState.CardMultiplayerConstraint), 1, base.Owner.RunState.Rng.CombatCardGeneration).FirstOrDefault();\n\t\tif (cardModel != null)\n\t\t{\n\t\t\tif (base.IsUpgraded)\n\t\t\t{\n\t\t\t\tCardCmd.Upgrade(cardModel);\n\t\t\t}\n\t\t\tawait CardPileCmd.AddGeneratedCardToCombat(cardModel, PileType.Hand, base.Owner);\n\t\t}\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars.Block.UpgradeValueBy(1m);\n\t}",
+      "originalCost": 1,
+      "pointCost": 7,
+      "portraitFrom": "ManifestAuthority",
+      "type": "Skill",
+      "rarity": "Uncommon",
+      "target": "Self",
+      "gainsBlock": true,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new BlockVar(7m, ValueProp.Move)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: Block +1",
+        "vars": {
+          "Block": 1
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "MeteorShowerFragment",
+      "name": "MeteorShower",
+      "id": "PARTSMITH-METEOR_SHOWER_FRAGMENT",
+      "starCost": 2,
+      "starCostX": false,
+      "title": "Meteor Shower",
+      "titleZh": "流星雨",
+      "description": "Deal {Damage:diff()} damage to ALL enemies.\nApply {WeakPower:diff()} [gold]Weak[/gold] and [gold]Vulnerable[/gold] to ALL enemies.",
+      "descriptionZh": "对所有敌人造成{Damage:diff()}点伤害。\n给予所有敌人{WeakPower:diff()}层[gold]虚弱[/gold]和[gold]易伤[/gold]。",
+      "onPlayCode": "{\n\t\tawait DamageCmd.Attack(base.DynamicVars.Damage.BaseValue).FromCard(this, cardPlay).TargetingAllOpponents(base.CombatState)\n\t\t\t.WithHitFx(\"vfx/vfx_attack_blunt\", null, \"blunt_attack.mp3\")\n\t\t\t.Execute(choiceContext);\n\t\tawait PowerCmd.Apply<WeakPower>(choiceContext, base.CombatState?.HittableEnemies, base.DynamicVars.Weak.BaseValue, base.Owner.Creature, this);\n\t\tawait PowerCmd.Apply<VulnerablePower>(choiceContext, base.CombatState?.HittableEnemies, base.DynamicVars.Vulnerable.BaseValue, base.Owner.Creature, this);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars.Damage.UpgradeValueBy(7m);\n\t}",
+      "originalCost": 0,
+      "pointCost": 6,
+      "portraitFrom": "MeteorShower",
+      "type": "Attack",
+      "rarity": "Ancient",
+      "target": "AllEnemies",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new DamageVar(14m, ValueProp.Move)",
+        "new PowerVar<VulnerablePower>(2m)",
+        "new PowerVar<WeakPower>(2m)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: Damage +7",
+        "vars": {
+          "Damage": 7
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "MonarchsGazeFragment",
+      "name": "MonarchsGaze",
+      "id": "PARTSMITH-MONARCHS_GAZE_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "Monarch's Gaze",
+      "titleZh": "王之凝视",
+      "description": "Whenever you attack an enemy, it loses {StrengthLoss:diff()} [gold]Strength[/gold] this turn.",
+      "descriptionZh": "每当你攻击敌人的时候，这名敌人在本回合失去{StrengthLoss:diff()}点[gold]力量[/gold]。",
+      "onPlayCode": "{\n\t\tawait CreatureCmd.TriggerAnim(base.Owner.Creature, \"PowerUp\", base.Owner.Character.PowerUpAnimDelay);\n\t\tawait PowerCmd.Apply<MonarchsGazePower>(choiceContext, base.Owner.Creature, base.DynamicVars[\"StrengthLoss\"].BaseValue, base.Owner.Creature, this);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.EnergyCost.UpgradeBy(-1);\n\t}",
+      "originalCost": 2,
+      "pointCost": 12,
+      "portraitFrom": "MonarchsGaze",
+      "type": "Power",
+      "rarity": "Rare",
+      "target": "Self",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new DynamicVar(\"StrengthLoss\", 1m)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: energy cost -1",
+        "vars": {},
+        "energyGain": 1,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "MonologueFragment",
+      "name": "Monologue",
+      "id": "PARTSMITH-MONOLOGUE_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "Monologue",
+      "titleZh": "独白",
+      "description": "Whenever you play a card this turn, gain {Power:diff()} [gold]Strength[/gold] this turn.",
+      "descriptionZh": "每当你在本回合打出卡牌时，在本回合获得{Power:diff()}点[gold]力量[/gold]。",
+      "onPlayCode": "{\n\t\tawait CreatureCmd.TriggerAnim(base.Owner.Creature, \"Cast\", base.Owner.Character.CastAnimDelay);\n\t\tMonologuePower monologuePower = await PowerCmd.Apply<MonologuePower>(choiceContext, base.Owner.Creature, 1m, base.Owner.Creature, this);\n\t\tif (monologuePower != null)\n\t\t{\n\t\t\tmonologuePower.DynamicVars.Strength.BaseValue = base.DynamicVars[\"Power\"].BaseValue;\n\t\t}\n\t}",
+      "onUpgradeCode": "{\n\t\tAddKeyword(CardKeyword.Retain);\n\t}",
+      "originalCost": 0,
+      "pointCost": 4,
+      "portraitFrom": "Monologue",
+      "type": "Skill",
+      "rarity": "Uncommon",
+      "target": "Self",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new DynamicVar(\"Power\", 1m)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: add Retain",
+        "vars": {},
+        "energyGain": null,
+        "addKeywords": [
+          "Retain"
+        ],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "NeutronAegisFragment",
+      "name": "NeutronAegis",
+      "id": "PARTSMITH-NEUTRON_AEGIS_FRAGMENT",
+      "starCost": 5,
+      "starCostX": false,
+      "title": "Neutron Aegis",
+      "titleZh": "中子护盾",
+      "description": "Gain {PlatingPower:diff()} [gold]Plating[/gold].",
+      "descriptionZh": "获得{PlatingPower:diff()}层[gold]覆甲[/gold]。",
+      "onPlayCode": "{\n\t\tawait PowerCmd.Apply<PlatingPower>(choiceContext, base.Owner.Creature, base.DynamicVars[\"PlatingPower\"].BaseValue, base.Owner.Creature, this);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars[\"PlatingPower\"].UpgradeValueBy(3m);\n\t}",
+      "originalCost": 1,
+      "pointCost": 8,
+      "portraitFrom": "NeutronAegis",
+      "type": "Power",
+      "rarity": "Rare",
+      "target": "Self",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new PowerVar<PlatingPower>(8m)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: PlatingPower +3",
+        "vars": {
+          "PlatingPower": 3
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "OrbitFragment",
+      "name": "Orbit",
+      "id": "PARTSMITH-ORBIT_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "Orbit",
+      "titleZh": "环绕轨道",
+      "description": "Every {energyPrefix:energyIcons(4)} you spend,\ngain {Energy:energyIcons()}.",
+      "descriptionZh": "你每花费{energyPrefix:energyIcons(4)}，\n就获得{Energy:energyIcons()}。",
+      "onPlayCode": "{\n\t\tawait CreatureCmd.TriggerAnim(base.Owner.Creature, \"PowerUp\", base.Owner.Character.PowerUpAnimDelay);\n\t\tawait PowerCmd.Apply<OrbitPower>(choiceContext, base.Owner.Creature, base.DynamicVars.Energy.BaseValue, base.Owner.Creature, this);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.EnergyCost.UpgradeBy(-1);\n\t}",
+      "originalCost": 2,
+      "pointCost": 11,
+      "portraitFrom": "Orbit",
+      "type": "Power",
+      "rarity": "Uncommon",
+      "target": "Self",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new EnergyVar(1)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: energy cost -1",
+        "vars": {},
+        "energyGain": 1,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "PaleBlueDotFragment",
+      "name": "PaleBlueDot",
+      "id": "PARTSMITH-PALE_BLUE_DOT_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "Pale Blue Dot",
+      "titleZh": "暗淡蓝点",
+      "description": "If you play {CardPlay} or more cards in a turn, draw {Cards:diff()} {Cards:plural:card|cards} at the start of your next turn.",
+      "descriptionZh": "如果你在一回合内打出了大于等于{CardPlay}张牌，在下个回合开始时抽{Cards:diff()}张牌。",
+      "onPlayCode": "{\n\t\tawait CreatureCmd.TriggerAnim(base.Owner.Creature, \"PowerUp\", base.Owner.Character.PowerUpAnimDelay);\n\t\tawait PowerCmd.Apply<PaleBlueDotPower>(choiceContext, base.Owner.Creature, base.DynamicVars.Cards.BaseValue, base.Owner.Creature, this);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars.Cards.UpgradeValueBy(1m);\n\t}",
+      "originalCost": 1,
+      "pointCost": 7,
+      "portraitFrom": "PaleBlueDot",
+      "type": "Power",
+      "rarity": "Uncommon",
+      "target": "Self",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new CardsVar(1)",
+        "new DynamicVar(\"CardPlay\", 5m)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: Cards +1",
+        "vars": {
+          "Cards": 1
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "ParryFragment",
+      "name": "Parry",
+      "id": "PARTSMITH-PARRY_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "Parry",
+      "titleZh": "招架",
+      "description": "[gold]Sovereign Blade[/gold] now gains {ParryPower:diff()} [gold]Block[/gold].",
+      "descriptionZh": "[gold]君王之剑[/gold]现在能让你获得{ParryPower:diff()}点[gold]格挡[/gold]。",
+      "onPlayCode": "{\n\t\tawait CreatureCmd.TriggerAnim(base.Owner.Creature, \"PowerUp\", base.Owner.Character.PowerUpAnimDelay);\n\t\tawait PowerCmd.Apply<ParryPower>(choiceContext, base.Owner.Creature, base.DynamicVars[\"ParryPower\"].BaseValue, base.Owner.Creature, this);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars[\"ParryPower\"].UpgradeValueBy(4m);\n\t}",
+      "originalCost": 1,
+      "pointCost": 7,
+      "portraitFrom": "Parry",
+      "type": "Power",
+      "rarity": "Uncommon",
+      "target": "Self",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new PowerVar<ParryPower>(10m)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: ParryPower +4",
+        "vars": {
+          "ParryPower": 4
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "ParticleWallFragment",
+      "name": "ParticleWall",
+      "id": "PARTSMITH-PARTICLE_WALL_FRAGMENT",
+      "starCost": 2,
+      "starCostX": false,
+      "title": "Particle Wall",
+      "titleZh": "粒子墙",
+      "description": "Gain {Block:diff()} [gold]Block[/gold].\nReturn this card to your [gold]Hand[/gold].",
+      "descriptionZh": "获得{Block:diff()}点[gold]格挡[/gold]。\n将此牌返回你的[gold]手牌[/gold]。",
+      "onPlayCode": "{\n\t\tawait CreatureCmd.GainBlock(base.Owner.Creature, base.DynamicVars.Block, cardPlay);\n\t\tawait Cmd.Wait(0.25f);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars.Block.UpgradeValueBy(3m);\n\t}",
+      "originalCost": 0,
+      "pointCost": 4,
+      "portraitFrom": "ParticleWall",
+      "type": "Skill",
+      "rarity": "Uncommon",
+      "target": "Self",
+      "gainsBlock": true,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new BlockVar(9m, ValueProp.Move)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: Block +3",
+        "vars": {
+          "Block": 3
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "PatterFragment",
+      "name": "Patter",
+      "id": "PARTSMITH-PATTER_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "Patter",
+      "titleZh": "星星点点",
+      "description": "Gain {Block:diff()} [gold]Block[/gold].\nGain {VigorPower:diff()} [gold]Vigor[/gold].",
+      "descriptionZh": "获得{Block:diff()}点[gold]格挡[/gold]。\n获得{VigorPower:diff()}点[gold]活力[/gold]。",
+      "onPlayCode": "{\n\t\tawait CreatureCmd.GainBlock(base.Owner.Creature, base.DynamicVars.Block, cardPlay);\n\t\tawait CreatureCmd.TriggerAnim(base.Owner.Creature, \"Cast\", base.Owner.Character.CastAnimDelay);\n\t\tawait PowerCmd.Apply<VigorPower>(choiceContext, base.Owner.Creature, base.DynamicVars[\"VigorPower\"].IntValue, base.Owner.Creature, this);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars.Block.UpgradeValueBy(2m);\n\t\tbase.DynamicVars[\"VigorPower\"].UpgradeValueBy(1m);\n\t}",
+      "originalCost": 1,
+      "pointCost": 6,
+      "portraitFrom": "Patter",
+      "type": "Skill",
+      "rarity": "Common",
+      "target": "Self",
+      "gainsBlock": true,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new BlockVar(8m, ValueProp.Move)",
+        "new PowerVar<VigorPower>(2m)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: Block +2, VigorPower +1",
+        "vars": {
+          "Block": 2,
+          "VigorPower": 1
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "PhotonCutFragment",
+      "name": "PhotonCut",
+      "id": "PARTSMITH-PHOTON_CUT_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "Photon Cut",
+      "titleZh": "光子切割",
+      "description": "Deal {Damage:diff()} damage.\nDraw {Cards:diff()} {Cards:plural:card|cards}.\nPut 1 card from your [gold]Hand[/gold] on top of your [gold]Draw Pile[/gold].",
+      "descriptionZh": "造成{Damage:diff()}点伤害。\n抽{Cards:diff()}张牌。\n将[gold]手牌[/gold]中的一张牌放到[gold]抽牌堆[/gold]顶部。",
+      "onPlayCode": "{\n\t\tArgumentNullException.ThrowIfNull(cardPlay.Target, \"cardPlay.Target\");\n\t\tawait DamageCmd.Attack(base.DynamicVars.Damage.BaseValue).FromCard(this, cardPlay).Targeting(cardPlay.Target)\n\t\t\t.WithHitFx(\"vfx/vfx_attack_slash\", null, \"dagger_throw.mp3\")\n\t\t\t.Execute(choiceContext);\n\t\tawait CardPileCmd.Draw(choiceContext, base.DynamicVars.Cards.BaseValue, base.Owner);\n\t\tawait CardPileCmd.Add(await CardSelectCmd.FromHand(prefs: new CardSelectorPrefs(base.SelectionScreenPrompt, base.DynamicVars[\"PutBack\"].IntValue), context: choiceContext, player: base.Owner, filter: null, source: this), PileType.Draw, CardPilePosition.Top);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars.Damage.UpgradeValueBy(3m);\n\t\tbase.DynamicVars.Cards.UpgradeValueBy(1m);\n\t}",
+      "originalCost": 1,
+      "pointCost": 6,
+      "portraitFrom": "PhotonCut",
+      "type": "Attack",
+      "rarity": "Common",
+      "target": "AnyEnemy",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new DamageVar(10m, ValueProp.Move)",
+        "new CardsVar(1)",
+        "new DynamicVar(\"PutBack\", 1m)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: Cards +1, Damage +3",
+        "vars": {
+          "Damage": 3,
+          "Cards": 1
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "PillarOfCreationFragment",
+      "name": "PillarOfCreation",
+      "id": "PARTSMITH-PILLAR_OF_CREATION_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "Pillar of Creation",
+      "titleZh": "创世之柱",
+      "description": "Whenever you create a card, gain {Block:diff()} [gold]Block[/gold].",
+      "descriptionZh": "你每次生成卡牌时，获得{Block:diff()}点[gold]格挡[/gold]。",
+      "onPlayCode": "{\n\t\tawait PowerCmd.Apply<PillarOfCreationPower>(choiceContext, base.Owner.Creature, base.DynamicVars.Block.BaseValue, base.Owner.Creature, this);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars.Block.UpgradeValueBy(1m);\n\t}",
+      "originalCost": 1,
+      "pointCost": 7,
+      "portraitFrom": "PillarOfCreation",
+      "type": "Power",
+      "rarity": "Uncommon",
+      "target": "Self",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new BlockVar(2m, ValueProp.Unpowered)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: Block +1",
+        "vars": {
+          "Block": 1
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "ProphesizeFragment",
+      "name": "Prophesize",
+      "id": "PARTSMITH-PROPHESIZE_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "Prophesize",
+      "titleZh": "预言",
+      "description": "Draw {Cards:diff()} {Cards:plural:card|cards}.",
+      "descriptionZh": "抽{Cards:diff()}张牌。",
+      "onPlayCode": "{\n\t\tawait CreatureCmd.TriggerAnim(base.Owner.Creature, \"Cast\", base.Owner.Character.AttackAnimDelay);\n\t\tawait CardPileCmd.Draw(choiceContext, base.DynamicVars.Cards.BaseValue, base.Owner);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars.Cards.UpgradeValueBy(3m);\n\t}",
+      "originalCost": 2,
+      "pointCost": 11,
+      "portraitFrom": "Prophesize",
+      "type": "Skill",
+      "rarity": "Uncommon",
+      "target": "Self",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new CardsVar(6)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: Cards +3",
+        "vars": {
+          "Cards": 3
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "QuasarFragment",
+      "name": "Quasar",
+      "id": "PARTSMITH-QUASAR_FRAGMENT",
+      "starCost": 2,
+      "starCostX": false,
+      "title": "Quasar",
+      "titleZh": "类星体",
+      "description": "Choose 1 of 3 random{IfUpgraded:show: [gold]Upgraded[/gold]|} Colorless cards to add into your [gold]Hand[/gold].",
+      "descriptionZh": "从3张随机{IfUpgraded:show:[gold]升级过[/gold]的|}无色牌中选择1张加入你的[gold]手牌[/gold]。",
+      "onPlayCode": "{\n\t\tList<CardModel> cards = CardFactory.GetDistinctForCombat(base.Owner, ModelDb.CardPool<ColorlessCardPool>().GetUnlockedCards(base.Owner.UnlockState, base.Owner.RunState.CardMultiplayerConstraint), 3, base.Owner.RunState.Rng.CombatCardGeneration).ToList();\n\t\tif (base.IsUpgraded)\n\t\t{\n\t\t\tCardCmd.Upgrade(cards, CardPreviewStyle.HorizontalLayout);\n\t\t}\n\t\tCardModel cardModel = await CardSelectCmd.FromChooseACardScreen(choiceContext, cards, base.Owner, canSkip: true);\n\t\tif (cardModel != null)\n\t\t{\n\t\t\tawait CardPileCmd.AddGeneratedCardToCombat(cardModel, PileType.Hand, base.Owner);\n\t\t}\n\t}",
+      "onUpgradeCode": null,
+      "originalCost": 0,
+      "pointCost": 4,
+      "portraitFrom": "Quasar",
+      "type": "Skill",
+      "rarity": "Uncommon",
+      "target": "Self",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [],
+      "upgrade": {
+        "summary": "Upgrade: ",
+        "vars": {},
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "RadiateFragment",
+      "name": "Radiate",
+      "id": "PARTSMITH-RADIATE_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "Radiate",
+      "titleZh": "辐射",
+      "description": "Deal {Damage:diff()} damage to ALL enemies for each {Stars:starIcons()} gained this turn.",
+      "descriptionZh": "本回合每获得一点 {Stars:starIcons()},就对所有敌人造成 {Damage:diff()} 点伤害。",
+      "onPlayCode": "{\n\t\tawait DamageCmd.Attack(base.DynamicVars.Damage.BaseValue).WithHitCount((int)((CalculatedVar)base.DynamicVars[\"CalculatedHits\"]).Calculate(cardPlay.Target)).FromCard(this, cardPlay)\n\t\t\t.TargetingAllOpponents(base.CombatState)\n\t\t\t.WithHitFx(\"vfx/vfx_starry_impact\", null, \"slash_attack.mp3\")\n\t\t\t.SpawningHitVfxOnEachCreature()\n\t\t\t.Execute(choiceContext);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars.Damage.UpgradeValueBy(1m);\n\t}",
+      "originalCost": 0,
+      "pointCost": 4,
+      "portraitFrom": "Radiate",
+      "type": "Attack",
+      "rarity": "Uncommon",
+      "target": "AllEnemies",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new DamageVar(3m, ValueProp.Move)",
+        "new StarsVar(1)",
+        "new CalculationBaseVar(0m)",
+        "new CalculationExtraVar(1m)",
+        "new CalculatedVar(\"CalculatedHits\").WithMultiplier((CardModel card, Creature? _) => (from e in CombatManager.Instance.History.Entries.OfType<StarsModifiedEntry>()\n            where e.HappenedThisTurn(card.CombatState) && e.Amount > 0 && e.Actor == card.Owner.Creature\n            select e).Sum((StarsModifiedEntry e) => e.Amount))"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: Damage +1",
+        "vars": {
+          "Damage": 1
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "RefineBladeFragment",
+      "name": "RefineBlade",
+      "id": "PARTSMITH-REFINE_BLADE_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "Refine Blade",
+      "titleZh": "淬炼刀刃",
+      "description": "[gold]Forge[/gold] {Forge:diff()}.\nNext turn, gain {Energy:energyIcons()}.",
+      "descriptionZh": "[gold]铸造[/gold]{Forge:diff()}。\n在下个回合获得{Energy:energyIcons()}。",
+      "onPlayCode": "{\n\t\tawait CreatureCmd.TriggerAnim(base.Owner.Creature, \"Cast\", base.Owner.Character.CastAnimDelay);\n\t\tawait ForgeCmd.Forge(base.DynamicVars.Forge.IntValue, base.Owner, this);\n\t\tawait PowerCmd.Apply<EnergyNextTurnPower>(choiceContext, base.Owner.Creature, base.DynamicVars.Energy.BaseValue, base.Owner.Creature, this);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars.Forge.UpgradeValueBy(4m);\n\t}",
+      "originalCost": 1,
+      "pointCost": 6,
+      "portraitFrom": "RefineBlade",
+      "type": "Skill",
+      "rarity": "Common",
+      "target": "Self",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new ForgeVar(9)",
+        "new EnergyVar(1)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: Forge +4",
+        "vars": {
+          "Forge": 4
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "ReflectFragment",
+      "name": "Reflect",
+      "id": "PARTSMITH-REFLECT_FRAGMENT",
+      "starCost": 3,
+      "starCostX": false,
+      "title": "Reflect",
+      "titleZh": "倒映",
+      "description": "Gain {Block:diff()} [gold]Block[/gold].\nBlocked attack damage is reflected to your attacker this turn.",
+      "descriptionZh": "获得{Block:diff()}点[gold]格挡[/gold]。\n在本回合将你格挡掉的攻击伤害反弹给攻击者。",
+      "onPlayCode": "{\n\t\tawait CreatureCmd.TriggerAnim(base.Owner.Creature, \"Cast\", base.Owner.Character.CastAnimDelay);\n\t\tawait CreatureCmd.GainBlock(base.Owner.Creature, base.DynamicVars.Block, cardPlay);\n\t\tawait PowerCmd.Apply<ReflectPower>(choiceContext, base.Owner.Creature, 1m, base.Owner.Creature, this);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars.Block.UpgradeValueBy(5m);\n\t}",
+      "originalCost": 1,
+      "pointCost": 7,
+      "portraitFrom": "Reflect",
+      "type": "Skill",
+      "rarity": "Uncommon",
+      "target": "Self",
+      "gainsBlock": true,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new BlockVar(15m, ValueProp.Move)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: Block +5",
+        "vars": {
+          "Block": 5
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "ResonanceFragment",
+      "name": "Resonance",
+      "id": "PARTSMITH-RESONANCE_FRAGMENT",
+      "starCost": 2,
+      "starCostX": false,
+      "title": "Resonance",
+      "titleZh": "共鸣",
+      "description": "Gain {StrengthPower:diff()} [gold]Strength[/gold]. ALL enemies lose 1 [gold]Strength[/gold].",
+      "descriptionZh": "获得{StrengthPower:diff()}点[gold]力量[/gold]。所有敌人失去1点[gold]力量[/gold]。",
+      "onPlayCode": "{\n\t\tawait CreatureCmd.TriggerAnim(base.Owner.Creature, \"Cast\", base.Owner.Character.CastAnimDelay);\n\t\tint intValue = base.DynamicVars[\"StrengthPower\"].IntValue;\n\t\tawait PowerCmd.Apply<StrengthPower>(choiceContext, base.Owner.Creature, intValue, base.Owner.Creature, this);\n\t\tforeach (Creature hittableEnemy in base.CombatState.HittableEnemies)\n\t\t{\n\t\t\tawait PowerCmd.Apply<StrengthPower>(choiceContext, hittableEnemy, -1m, base.Owner.Creature, this);\n\t\t}\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars[\"StrengthPower\"].UpgradeValueBy(1m);\n\t}",
+      "originalCost": 1,
+      "pointCost": 7,
+      "portraitFrom": "Resonance",
+      "type": "Skill",
+      "rarity": "Uncommon",
+      "target": "AllEnemies",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new PowerVar<StrengthPower>(1m)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: StrengthPower +1",
+        "vars": {
+          "StrengthPower": 1
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "RoyalGambleFragment",
+      "name": "RoyalGamble",
+      "id": "PARTSMITH-ROYAL_GAMBLE_FRAGMENT",
+      "starCost": 5,
+      "starCostX": false,
+      "title": "Royal Gamble",
+      "titleZh": "胜券在王",
+      "description": "Gain {Stars:diff()} {singleStarIcon}.",
+      "descriptionZh": "获得{Stars:diff()}{singleStarIcon}。",
+      "onPlayCode": "{\n\t\tawait CreatureCmd.TriggerAnim(base.Owner.Creature, \"Cast\", base.Owner.Character.AttackAnimDelay);\n\t\tawait PlayerCmd.GainStars(base.DynamicVars.Stars.BaseValue, base.Owner);\n\t}",
+      "onUpgradeCode": "{\n\t\tAddKeyword(CardKeyword.Retain);\n\t}",
+      "originalCost": 0,
+      "pointCost": 4,
+      "portraitFrom": "RoyalGamble",
+      "type": "Skill",
+      "rarity": "Uncommon",
+      "target": "Self",
+      "gainsBlock": null,
+      "keywords": [
+        "Exhaust"
+      ],
+      "tags": [],
+      "dynamicVars": [
+        "new StarsVar(9)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: add Retain",
+        "vars": {},
+        "energyGain": null,
+        "addKeywords": [
+          "Retain"
+        ],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "RoyaltiesFragment",
+      "name": "Royalties",
+      "id": "PARTSMITH-ROYALTIES_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "Royalties",
+      "titleZh": "王国资产",
+      "description": "At the end of combat, gain {Gold:diff()} [gold]Gold[/gold].",
+      "descriptionZh": "在战斗结束时，获得{Gold:diff()}[gold]金币[/gold]。",
+      "onPlayCode": "{\n\t\tawait CreatureCmd.TriggerAnim(base.Owner.Creature, \"PowerUp\", base.Owner.Character.PowerUpAnimDelay);\n\t\tawait PowerCmd.Apply<RoyaltiesPower>(choiceContext, base.Owner.Creature, base.DynamicVars.Gold.BaseValue, base.Owner.Creature, this);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars.Gold.UpgradeValueBy(10m);\n\t}",
+      "originalCost": 1,
+      "pointCost": 8,
+      "portraitFrom": "Royalties",
+      "type": "Power",
+      "rarity": "Rare",
+      "target": "Self",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new GoldVar(30)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: Gold +10",
+        "vars": {
+          "Gold": 10
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "SeekingEdgeFragment",
+      "name": "SeekingEdge",
+      "id": "PARTSMITH-SEEKING_EDGE_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "Seeking Edge",
+      "titleZh": "追踪之刃",
+      "description": "[gold]Forge[/gold] {Forge:diff()}.\n[gold]Sovereign Blade[/gold] now deals damage to ALL enemies.",
+      "descriptionZh": "[gold]铸造[/gold]{Forge:diff()}。\n[gold]君王之剑[/gold]现在会对所有敌人造成伤害。",
+      "onPlayCode": "{\n\t\tawait CreatureCmd.TriggerAnim(base.Owner.Creature, \"PowerUp\", base.Owner.Character.PowerUpAnimDelay);\n\t\tawait PowerCmd.Apply<SeekingEdgePower>(choiceContext, base.Owner.Creature, 1m, base.Owner.Creature, this);\n\t\tawait ForgeCmd.Forge(base.DynamicVars.Forge.IntValue, base.Owner, this);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars.Forge.UpgradeValueBy(4m);\n\t}",
+      "originalCost": 1,
+      "pointCost": 8,
+      "portraitFrom": "SeekingEdge",
+      "type": "Power",
+      "rarity": "Rare",
+      "target": "Self",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new ForgeVar(7)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: Forge +4",
+        "vars": {
+          "Forge": 4
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "SevenStarsFragment",
+      "name": "SevenStars",
+      "id": "PARTSMITH-SEVEN_STARS_FRAGMENT",
+      "starCost": 7,
+      "starCostX": false,
+      "title": "Seven Stars",
+      "titleZh": "七星",
+      "description": "Deal {Damage:diff()} damage to ALL enemies {Repeat:diff()} {Repeat:plural:time|times}.",
+      "descriptionZh": "对所有敌人造成{Damage:diff()}点伤害{Repeat:diff()}次。",
+      "onPlayCode": "{\n\t\tawait DamageCmd.Attack(base.DynamicVars.Damage.BaseValue).WithHitCount(base.DynamicVars.Repeat.IntValue).FromCard(this, cardPlay)\n\t\t\t.TargetingAllOpponents(base.CombatState)\n\t\t\t.WithHitFx(\"vfx/vfx_starry_impact\", null, \"slash_attack.mp3\")\n\t\t\t.SpawningHitVfxOnEachCreature()\n\t\t\t.Execute(choiceContext);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.EnergyCost.UpgradeBy(-1);\n\t}",
+      "originalCost": 2,
+      "pointCost": 12,
+      "portraitFrom": "SevenStars",
+      "type": "Attack",
+      "rarity": "Rare",
+      "target": "AllEnemies",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new DamageVar(7m, ValueProp.Move)",
+        "new RepeatVar(7)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: energy cost -1",
+        "vars": {},
+        "energyGain": 1,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "ShiningStrikeFragment",
+      "name": "ShiningStrike",
+      "id": "PARTSMITH-SHINING_STRIKE_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "Shining Strike",
+      "titleZh": "明耀打击",
+      "description": "Deal {Damage:diff()} damage.\nGain {Stars:starIcons()}.\nPut this card on top of your [gold]Draw Pile[/gold].",
+      "descriptionZh": "造成{Damage:diff()}点伤害。\n获得{Stars:starIcons()}。\n将这张牌放置于你的[gold]抽牌堆[/gold]顶部。",
+      "onPlayCode": "{\n\t\tArgumentNullException.ThrowIfNull(cardPlay.Target, \"cardPlay.Target\");\n\t\tawait DamageCmd.Attack(base.DynamicVars.Damage.BaseValue).FromCard(this, cardPlay).Targeting(cardPlay.Target)\n\t\t\t.WithHitFx(\"vfx/vfx_starry_impact\")\n\t\t\t.Execute(choiceContext);\n\t\tawait PlayerCmd.GainStars(base.DynamicVars.Stars.BaseValue, base.Owner);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars.Damage.UpgradeValueBy(3m);\n\t}",
+      "originalCost": 1,
+      "pointCost": 7,
+      "portraitFrom": "ShiningStrike",
+      "type": "Attack",
+      "rarity": "Uncommon",
+      "target": "AnyEnemy",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [
+        "Strike"
+      ],
+      "dynamicVars": [
+        "new DamageVar(8m, ValueProp.Move)",
+        "new StarsVar(2)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: Damage +3",
+        "vars": {
+          "Damage": 3
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "SolarStrikeFragment",
+      "name": "SolarStrike",
+      "id": "PARTSMITH-SOLAR_STRIKE_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "Solar Strike",
+      "titleZh": "太阳打击",
+      "description": "Deal {Damage:diff()} damage.\nGain {Stars:starIcons()}.",
+      "descriptionZh": "造成{Damage:diff()}点伤害。\n获得{Stars:starIcons()}。",
+      "onPlayCode": "{\n\t\tArgumentNullException.ThrowIfNull(cardPlay.Target, \"cardPlay.Target\");\n\t\tawait DamageCmd.Attack(base.DynamicVars.Damage.BaseValue).FromCard(this, cardPlay).Targeting(cardPlay.Target)\n\t\t\t.WithHitFx(\"vfx/vfx_attack_slash\")\n\t\t\t.Execute(choiceContext);\n\t\tawait PlayerCmd.GainStars(base.DynamicVars.Stars.BaseValue, base.Owner);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars.Damage.UpgradeValueBy(1m);\n\t\tbase.DynamicVars.Stars.UpgradeValueBy(1m);\n\t}",
+      "originalCost": 1,
+      "pointCost": 6,
+      "portraitFrom": "SolarStrike",
+      "type": "Attack",
+      "rarity": "Common",
+      "target": "AnyEnemy",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [
+        "Strike"
+      ],
+      "dynamicVars": [
+        "new DamageVar(9m, ValueProp.Move)",
+        "new StarsVar(1)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: Damage +1, Stars +1",
+        "vars": {
+          "Damage": 1,
+          "Stars": 1
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "SpectrumShiftFragment",
+      "name": "SpectrumShift",
+      "id": "PARTSMITH-SPECTRUM_SHIFT_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "Spectrum Shift",
+      "titleZh": "光谱偏移",
+      "description": "At the start of your turn, add {Cards:diff()} random Colorless {Cards:plural:card|cards} into your [gold]Hand[/gold].",
+      "descriptionZh": "在你的回合开始时，将{Cards:diff()}张随机无色牌添加到你的[gold]手牌[/gold]中。",
+      "onPlayCode": "{\n\t\tawait CreatureCmd.TriggerAnim(base.Owner.Creature, \"PowerUp\", base.Owner.Character.PowerUpAnimDelay);\n\t\tawait PowerCmd.Apply<SpectrumShiftPower>(choiceContext, base.Owner.Creature, base.DynamicVars.Cards.BaseValue, base.Owner.Creature, this);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.EnergyCost.UpgradeBy(-1);\n\t}",
+      "originalCost": 2,
+      "pointCost": 11,
+      "portraitFrom": "SpectrumShift",
+      "type": "Power",
+      "rarity": "Uncommon",
+      "target": "Self",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new CardsVar(1)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: energy cost -1",
+        "vars": {},
+        "energyGain": 1,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "SpoilsOfBattleFragment",
+      "name": "SpoilsOfBattle",
+      "id": "PARTSMITH-SPOILS_OF_BATTLE_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "Spoils of Battle",
+      "titleZh": "战利品",
+      "description": "[gold]Forge[/gold] {Forge:diff()}.\nDraw {Cards:diff()} {Cards:plural:card|cards}.",
+      "descriptionZh": "[gold]铸造[/gold]{Forge:diff()}。\n抽{Cards:diff()}张牌。",
+      "onPlayCode": "{\n\t\tawait ForgeCmd.Forge(base.DynamicVars.Forge.IntValue, base.Owner, this);\n\t\tawait CardPileCmd.Draw(choiceContext, base.DynamicVars.Cards.BaseValue, base.Owner);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars.Forge.UpgradeValueBy(3m);\n\t}",
+      "originalCost": 1,
+      "pointCost": 6,
+      "portraitFrom": "SpoilsOfBattle",
+      "type": "Skill",
+      "rarity": "Common",
+      "target": "Self",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new ForgeVar(5)",
+        "new CardsVar(2)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: Forge +3",
+        "vars": {
+          "Forge": 3
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "StardustFragment",
+      "name": "Stardust",
+      "id": "PARTSMITH-STARDUST_FRAGMENT",
+      "starCost": 0,
+      "starCostX": true,
+      "title": "Stardust",
+      "titleZh": "星尘",
+      "description": "Deal {Damage:diff()} damage to a random enemy X times.",
+      "descriptionZh": "随机对敌人造成{Damage:diff()}点伤害X次。",
+      "onPlayCode": "{\n\t\tawait DamageCmd.Attack(base.DynamicVars.Damage.BaseValue).WithHitCount(ResolveStarXValue()).FromCard(this, cardPlay)\n\t\t\t.TargetingRandomOpponents(base.CombatState)\n\t\t\t.WithHitFx(\"vfx/vfx_starry_impact\")\n\t\t\t.Execute(choiceContext);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars.Damage.UpgradeValueBy(2m);\n\t}",
+      "originalCost": 0,
+      "pointCost": 4,
+      "portraitFrom": "Stardust",
+      "type": "Attack",
+      "rarity": "Uncommon",
+      "target": "RandomEnemy",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new DamageVar(5m, ValueProp.Move)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: Damage +2",
+        "vars": {
+          "Damage": 2
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "SummonForthFragment",
+      "name": "SummonForth",
+      "id": "PARTSMITH-SUMMON_FORTH_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "Summon Forth",
+      "titleZh": "征召上前",
+      "description": "Put [gold]Sovereign Blade[/gold] into your [gold]Hand[/gold] from anywhere.\n[gold]Forge[/gold] {Forge:diff()}.",
+      "descriptionZh": "不论何处，将[gold]君王之剑[/gold]放入你的[gold]手牌[/gold]。\n[gold]铸造[/gold]{Forge:diff()}。",
+      "onPlayCode": "{\n\t\tawait CreatureCmd.TriggerAnim(base.Owner.Creature, \"Cast\", base.Owner.Character.CastAnimDelay);\n\t\tIEnumerable<SovereignBlade> cards = base.Owner.PlayerCombatState.AllCards.OfType<SovereignBlade>().Where(delegate(SovereignBlade c)\n\t\t{\n\t\t\tCardPile? pile = c.Pile;\n\t\t\treturn pile == null || pile.Type != PileType.Hand;\n\t\t});\n\t\tawait CardPileCmd.Add(cards, PileType.Hand);\n\t\tawait ForgeCmd.Forge(base.DynamicVars.Forge.IntValue, base.Owner, this);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars.Forge.UpgradeValueBy(3m);\n\t}",
+      "originalCost": 1,
+      "pointCost": 7,
+      "portraitFrom": "SummonForth",
+      "type": "Skill",
+      "rarity": "Uncommon",
+      "target": "Self",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new ForgeVar(8)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: Forge +3",
+        "vars": {
+          "Forge": 3
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "SupermassiveFragment",
+      "name": "Supermassive",
+      "id": "PARTSMITH-SUPERMASSIVE_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "Supermassive",
+      "titleZh": "超质量体",
+      "description": "Deal {CalculationBase:diff()} damage. Deals {ExtraDamage:diff()} additional damage for each card you created this combat.",
+      "descriptionZh": "造成 {CalculationBase:diff()} 点伤害。本场战斗中每生成一张卡,此牌额外造成 {ExtraDamage:diff()} 点伤害。",
+      "onPlayCode": "{\n\t\tArgumentNullException.ThrowIfNull(cardPlay.Target, \"cardPlay.Target\");\n\t\tawait DamageCmd.Attack(base.DynamicVars.CalculatedDamage).FromCard(this, cardPlay).Targeting(cardPlay.Target)\n\t\t\t.WithHitFx(\"vfx/vfx_attack_slash\", null, \"heavy_attack.mp3\")\n\t\t\t.Execute(choiceContext);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars.ExtraDamage.UpgradeValueBy(1m);\n\t}",
+      "originalCost": 1,
+      "pointCost": 7,
+      "portraitFrom": "Supermassive",
+      "type": "Attack",
+      "rarity": "Uncommon",
+      "target": "AnyEnemy",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new CalculationBaseVar(5m)",
+        "new ExtraDamageVar(3m)",
+        "new CalculatedDamageVar(ValueProp.Move).WithMultiplier((CardModel card, Creature? _) => CombatManager.Instance.History.Entries.OfType<CardGeneratedEntry>().Count((CardGeneratedEntry c) => c.Creator == card.Owner))"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: ExtraDamage +1",
+        "vars": {
+          "ExtraDamage": 1
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "SwordSageFragment",
+      "name": "SwordSage",
+      "id": "PARTSMITH-SWORD_SAGE_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "Sword Sage",
+      "titleZh": "剑圣",
+      "description": "[gold]Sovereign Blade[/gold] gains [gold]Replay[/gold] {SwordSagePower:diff()}.",
+      "descriptionZh": "[gold]君王之剑[/gold]获得[gold]重放[/gold]{SwordSagePower:diff()}。",
+      "onPlayCode": "{\n\t\tawait CreatureCmd.TriggerAnim(base.Owner.Creature, \"PowerUp\", base.Owner.Character.PowerUpAnimDelay);\n\t\tawait PowerCmd.Apply<SwordSagePower>(choiceContext, base.Owner.Creature, base.DynamicVars[\"SwordSagePower\"].BaseValue, base.Owner.Creature, this);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.EnergyCost.UpgradeBy(-1);\n\t}",
+      "originalCost": 2,
+      "pointCost": 12,
+      "portraitFrom": "SwordSage",
+      "type": "Power",
+      "rarity": "Rare",
+      "target": "Self",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new PowerVar<SwordSagePower>(1m)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: energy cost -1",
+        "vars": {},
+        "energyGain": 1,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "TerraformingFragment",
+      "name": "Terraforming",
+      "id": "PARTSMITH-TERRAFORMING_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "Terraforming",
+      "titleZh": "地形改造",
+      "description": "Gain {VigorPower:diff()} [gold]Vigor[/gold].",
+      "descriptionZh": "获得{VigorPower:diff()}点[gold]活力[/gold]。",
+      "onPlayCode": "{\n\t\tawait PowerCmd.Apply<VigorPower>(choiceContext, base.Owner.Creature, base.DynamicVars[\"VigorPower\"].IntValue, base.Owner.Creature, this);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars[\"VigorPower\"].UpgradeValueBy(3m);\n\t}",
+      "originalCost": 1,
+      "pointCost": 7,
+      "portraitFrom": "Terraforming",
+      "type": "Skill",
+      "rarity": "Uncommon",
+      "target": "Self",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new PowerVar<VigorPower>(7m)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: VigorPower +3",
+        "vars": {
+          "VigorPower": 3
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "TheSealedThroneFragment",
+      "name": "TheSealedThrone",
+      "id": "PARTSMITH-THE_SEALED_THRONE_FRAGMENT",
+      "starCost": 3,
+      "starCostX": false,
+      "title": "The Sealed Throne",
+      "titleZh": "封印王座",
+      "description": "Whenever you play a card, gain {singleStarIcon}.",
+      "descriptionZh": "你每打出一张牌，获得{singleStarIcon}。",
+      "onPlayCode": "{\n\t\tawait CreatureCmd.TriggerAnim(base.Owner.Creature, \"PowerUp\", base.Owner.Character.PowerUpAnimDelay);\n\t\tawait PowerCmd.Apply<TheSealedThronePower>(choiceContext, base.Owner.Creature, 1m, base.Owner.Creature, this);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.EnergyCost.UpgradeBy(-1);\n\t}",
+      "originalCost": 1,
+      "pointCost": 9,
+      "portraitFrom": "TheSealedThrone",
+      "type": "Power",
+      "rarity": "Ancient",
+      "target": "Self",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [],
+      "upgrade": {
+        "summary": "Upgrade: energy cost -1",
+        "vars": {},
+        "energyGain": 1,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "TheSmithFragment",
+      "name": "TheSmith",
+      "id": "PARTSMITH-THE_SMITH_FRAGMENT",
+      "starCost": 4,
+      "starCostX": false,
+      "title": "The Smith",
+      "titleZh": "铸剑者",
+      "description": "[gold]Forge[/gold] {Forge:diff()}.",
+      "descriptionZh": "[gold]铸造[/gold]{Forge:diff()}。",
+      "onPlayCode": "{\n\t\tawait CreatureCmd.TriggerAnim(base.Owner.Creature, \"Cast\", base.Owner.Character.CastAnimDelay);\n\t\tawait ForgeCmd.Forge(base.DynamicVars.Forge.IntValue, base.Owner, this);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars.Forge.UpgradeValueBy(10m);\n\t}",
+      "originalCost": 1,
+      "pointCost": 8,
+      "portraitFrom": "TheSmith",
+      "type": "Skill",
+      "rarity": "Rare",
+      "target": "Self",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new ForgeVar(30)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: Forge +10",
+        "vars": {
+          "Forge": 10
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "TyrannyFragment",
+      "name": "Tyranny",
+      "id": "PARTSMITH-TYRANNY_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "Tyranny",
+      "titleZh": "暴政",
+      "description": "At the start of your turn, draw 1 card and [gold]Exhaust[/gold] 1 card from your [gold]Hand[/gold].",
+      "descriptionZh": "在你的回合开始时，抽一张牌，并从你的[gold]手牌[/gold]中[gold]消耗[/gold]1张牌。",
+      "onPlayCode": "{\n\t\tawait CreatureCmd.TriggerAnim(base.Owner.Creature, \"PowerUp\", base.Owner.Character.PowerUpAnimDelay);\n\t\tawait PowerCmd.Apply<TyrannyPower>(choiceContext, base.Owner.Creature, 1m, base.Owner.Creature, this);\n\t}",
+      "onUpgradeCode": "{\n\t\tAddKeyword(CardKeyword.Innate);\n\t}",
+      "originalCost": 1,
+      "pointCost": 8,
+      "portraitFrom": "Tyranny",
+      "type": "Power",
+      "rarity": "Rare",
+      "target": "Self",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [],
+      "upgrade": {
+        "summary": "Upgrade: add Innate",
+        "vars": {},
+        "energyGain": null,
+        "addKeywords": [
+          "Innate"
+        ],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "VoidFormFragment",
+      "name": "VoidForm",
+      "id": "PARTSMITH-VOID_FORM_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "Void Form",
+      "titleZh": "虚空形态",
+      "description": "End your turn.\nThe first {VoidFormPower:plural:card|{VoidFormPower:diff()} cards} you play each turn {VoidFormPower:plural:is|are} free to play.",
+      "descriptionZh": "结束你的回合。\n你可以免费打出每回合的前{VoidFormPower:diff()}张牌。",
+      "onPlayCode": "{\n\t\tawait CreatureCmd.TriggerAnim(base.Owner.Creature, \"PowerUp\", base.Owner.Character.PowerUpAnimDelay);\n\t\tawait PowerCmd.Apply<VoidFormPower>(choiceContext, base.Owner.Creature, base.DynamicVars[\"VoidFormPower\"].BaseValue, base.Owner.Creature, this);\n\t\tPlayerCmd.EndTurn(base.Owner, canBackOut: false);\n\t}",
+      "onUpgradeCode": "{\n\t\tRemoveKeyword(CardKeyword.Ethereal);\n\t}",
+      "originalCost": 3,
+      "pointCost": 17,
+      "portraitFrom": "VoidForm",
+      "type": "Power",
+      "rarity": "Rare",
+      "target": "Self",
+      "gainsBlock": null,
+      "keywords": [
+        "Ethereal"
+      ],
+      "tags": [],
+      "dynamicVars": [
+        "new PowerVar<VoidFormPower>(2m)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: remove Ethereal",
+        "vars": {},
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [
+          "Ethereal"
+        ],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    },
+    {
+      "className": "WroughtInWarFragment",
+      "name": "WroughtInWar",
+      "id": "PARTSMITH-WROUGHT_IN_WAR_FRAGMENT",
+      "starCost": 0,
+      "starCostX": false,
+      "title": "Wrought in War",
+      "titleZh": "战火铸就",
+      "description": "Deal {Damage:diff()} damage.\n[gold]Forge[/gold] {Forge:diff()}.",
+      "descriptionZh": "造成{Damage:diff()}点伤害。\n[gold]铸造[/gold]{Forge:diff()}。",
+      "onPlayCode": "{\n\t\tArgumentNullException.ThrowIfNull(cardPlay.Target, \"cardPlay.Target\");\n\t\tawait DamageCmd.Attack(base.DynamicVars.Damage.BaseValue).FromCard(this, cardPlay).Targeting(cardPlay.Target)\n\t\t\t.WithHitFx(\"vfx/vfx_attack_blunt\")\n\t\t\t.Execute(choiceContext);\n\t\tawait ForgeCmd.Forge(base.DynamicVars.Forge.IntValue, base.Owner, this);\n\t}",
+      "onUpgradeCode": "{\n\t\tbase.DynamicVars.Damage.UpgradeValueBy(2m);\n\t\tbase.DynamicVars.Forge.UpgradeValueBy(2m);\n\t}",
+      "originalCost": 1,
+      "pointCost": 6,
+      "portraitFrom": "WroughtInWar",
+      "type": "Attack",
+      "rarity": "Common",
+      "target": "AnyEnemy",
+      "gainsBlock": null,
+      "keywords": [],
+      "tags": [],
+      "dynamicVars": [
+        "new DamageVar(7m, ValueProp.Move)",
+        "new ForgeVar(7)"
+      ],
+      "upgrade": {
+        "summary": "Upgrade: Damage +2, Forge +2",
+        "vars": {
+          "Damage": 2,
+          "Forge": 2
+        },
+        "energyGain": null,
+        "addKeywords": [],
+        "removeKeywords": [],
+        "cost": null,
+        "behavior": null
+      },
+      "note": null
+    }
+  ]
+}

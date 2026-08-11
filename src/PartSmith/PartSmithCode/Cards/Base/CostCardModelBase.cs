@@ -43,6 +43,13 @@ public abstract class CostCardModelBase(int cost, CardType type, CardRarity rari
         }
     }
 
+    /// <summary>
+    /// X 星费(方案 A 宿主携带星费,Stardust 用):拼了任意带 <c>HasStarCostX</c> 的效果卡 → 宿主也是 X 星费。
+    /// 基游戏随后按 X 处理:费用 = 当前星数(<see cref="CardModel.GetStarCostWithModifiers"/> 的 HasStarCostX 分支),
+    /// 打出耗光所有星,<c>LastStarsSpent = 打出时星数</c> → <c>ResolveStarXValue()</c> 可用。
+    /// </summary>
+    public override bool HasStarCostX => SpliceController.AttachedEffects(this).Any(e => e.HasStarCostX);
+
     /// <summary>卡面 = 第一张效果卡的图;空壳 = 本卡占位图。</summary>
     public override string PortraitPath
     {

@@ -74,6 +74,8 @@
 
 ## 6. 典型场景清单(verify_in_game.py)
 
+通过修改verify_in_game.py 可以验证不同的卡片。不过，脚本操作可能触发意外的bug，建议只在脚本中写卡片验证有关的操作，选择角色，开始游戏，进入房间的流程应该在脚本外完成。
+
 | 场景 | 验证点 | 断言口径 |
 |---|---|---|
 | `armaments_upgrade` | 军械升级描述切换 | 描述含 "Upgrade all cards in your hand." / 「升级你的所有手牌。」 |

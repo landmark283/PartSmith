@@ -25,6 +25,15 @@ public abstract class EffectCardModelBase(int cost, CardType type, CardRarity ra
     public virtual int PointCost => 0;
 
     /// <summary>
+    /// 星费:原版储君卡"能量 + 辉星"双轨费里的辉星部分(如 FallingStar 打 8 需 2 星)。
+    /// 效果卡本身不被单独打出、星费不直接生效;拼接时由
+    /// <see cref="SpliceController.RefreshHostStarCost"/> 累加写到宿主壳的 <c>_baseStarCost</c>(方案 A 宿主携带星费),
+    /// 基游戏的打出流程随后免费接管:能量/星不足 → 灰显不可点;打出 → 自动 SpendStars;
+    /// <c>LastStarsSpent</c> 就位 → <c>ResolveStarXValue()</c> 可用。0 = 无星费(默认)。
+    /// </summary>
+    public virtual int StarCost => 0;
+
+    /// <summary>
     /// 消耗后逐回合自动复播(原版 HowlFromBeyond 行为)。效果卡是 canonical 单例、不在战斗牌堆,
     /// AfterAutoPostPlayPhaseEntered 的 combat hook 只会派发到宿主拼卡,所以复播判定放在
     /// <see cref="CostCardModelBase"/> 层:宿主在消耗牌堆且拼了本效果时 AutoPlay。

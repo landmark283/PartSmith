@@ -211,6 +211,9 @@ public class PartSelfTestCommand : AbstractConsoleCmd
         {
             costCard.AddKeyword(keyword);
         }
+
+        // 星费(方案 A 宿主携带星费):与 AttachEffect 同步,让 parttest 造的拼卡也带星费。
+        SpliceController.RefreshHostStarCost(costCard);
     }
 
     private CmdResult Info(Player player, string[] args)
@@ -229,8 +232,9 @@ public class PartSelfTestCommand : AbstractConsoleCmd
         string points = card is CostCardModelBase cost
             ? $"  points {SpliceController.UsedPoints(card)}/{cost.PointCapacity}"
             : "";
+        string stars = card.CurrentStarCost > 0 ? $" starCost={card.CurrentStarCost}" : "";
         string desc = card.GetDescriptionForPile(PileType.Hand, null) ?? "";
-        return new CmdResult(true, $"[{index}] {card.Title}\nType={card.Type} Target={card.TargetType} Keywords=[{keywords}]{points}\n{desc}");
+        return new CmdResult(true, $"[{index}] {card.Title}\nType={card.Type} Target={card.TargetType} Keywords=[{keywords}]{points}{stars}\n{desc}");
     }
 
     private CmdResult Encounters()
@@ -255,10 +259,13 @@ public class PartSelfTestCommand : AbstractConsoleCmd
             "cost" => new[] { "PartSmithCostCardPool" },
             "hunter_effect" => new[] { "PartSmithHunterEffectCardPool" },
             "hunter_cost" => new[] { "PartSmithHunterCostCardPool" },
+            "wang_effect" => new[] { "PartSmithWangEffectCardPool" },
+            "wang_cost" => new[] { "PartSmithWangCostCardPool" },
             "all" => new[]
             {
                 "PartSmithEffectCardPool", "PartSmithCostCardPool",
                 "PartSmithHunterEffectCardPool", "PartSmithHunterCostCardPool",
+                "PartSmithWangEffectCardPool", "PartSmithWangCostCardPool",
             },
             _ => new[] { "PartSmithEffectCardPool" },
         };

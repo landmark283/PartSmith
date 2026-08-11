@@ -40,6 +40,8 @@ internal static class PartSmithCardLibraryFiltersPatch
     private const string EffectFilterName = "FILTER-partsmith_effect";
     private const string HunterCostFilterName = "FILTER-partsmith_hunter_cost";
     private const string HunterEffectFilterName = "FILTER-partsmith_hunter_effect";
+    private const string WangCostFilterName = "FILTER-partsmith_wang_cost";
+    private const string WangEffectFilterName = "FILTER-partsmith_wang_effect";
 
     /// <summary>
     /// 必须用最高优先级(后置补丁里先跑,已实证本版本 Harmony postfix 按优先级降序执行),
@@ -61,7 +63,8 @@ internal static class PartSmithCardLibraryFiltersPatch
         // 防重复(图鉴场景重开时 _Ready 会再跑一次)。
         foreach (var key in poolFilters.Keys)
         {
-            if (key.Name.ToString() is CostFilterName or EffectFilterName or HunterCostFilterName or HunterEffectFilterName)
+            if (key.Name.ToString() is CostFilterName or EffectFilterName or HunterCostFilterName or HunterEffectFilterName
+                or WangCostFilterName or WangEffectFilterName)
             {
                 return;
             }
@@ -86,12 +89,23 @@ internal static class PartSmithCardLibraryFiltersPatch
             new Color("4C9E5A"), new LocString("card_library", "PARTSMITH_POOL_HUNTER_EFFECT_TIP"),
             (CardModel c) => c.Pool is PartSmithHunterEffectCardPool);
 
-        // 大战士局内打开图鉴默认选中「费用卡池」;小猎人默认选中「猎人费用卡池」。
+        // 王(储君)专属池(regent 橙)过滤器按钮。
+        var wangCostFilter = AddFilter(
+            __instance, poolFilters, miscFilter, WangCostFilterName,
+            new Color("E36600"), new LocString("card_library", "PARTSMITH_POOL_WANG_COST_TIP"),
+            (CardModel c) => c.Pool is PartSmithWangCostCardPool);
+        AddFilter(
+            __instance, poolFilters, wangCostFilter, WangEffectFilterName,
+            new Color("FF9E2C"), new LocString("card_library", "PARTSMITH_POOL_WANG_EFFECT_TIP"),
+            (CardModel c) => c.Pool is PartSmithWangEffectCardPool);
+
+        // 大战士局内打开图鉴默认选中「费用卡池」;小猎人默认选中「猎人费用卡池」;王默认选中「王费用卡池」。
         if (AccessTools.DeclaredField(typeof(NCardLibrary), "_cardPoolFilters").GetValue(__instance)
             is Dictionary<CharacterModel, NCardPoolFilter> cardPoolFilters)
         {
             cardPoolFilters[ModelDb.Character<BigWarrior>()] = costFilter;
             cardPoolFilters[ModelDb.Character<LittleHunter>()] = hunterCostFilter;
+            cardPoolFilters[ModelDb.Character<Wang>()] = wangCostFilter;
         }
     }
 

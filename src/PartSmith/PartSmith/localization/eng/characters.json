@@ -30,5 +30,21 @@
   "PARTSMITH-LITTLE_HUNTER.goldMonologue": "这些金币,足以磨利刀刃。",
   "PARTSMITH-LITTLE_HUNTER.aromaPrinciple": "猎物的气息在此徘徊。",
   "PARTSMITH-LITTLE_HUNTER.banter.alive.endTurnPing": "该你出手了,伙伴。",
-  "PARTSMITH-LITTLE_HUNTER.banter.dead.endTurnPing": "我还能呼吸。"
+  "PARTSMITH-LITTLE_HUNTER.banter.dead.endTurnPing": "我还能呼吸。",
+  "PARTSMITH-WANG.title": "王",
+  "PARTSMITH-WANG.titleObject": "王",
+  "PARTSMITH-WANG.description": "群星王座的继承人,来自星国的太阳。他驾驭能量与辉星两种资源,以铸造之力锻造君王之剑。",
+  "PARTSMITH-WANG.pronounSubject": "他",
+  "PARTSMITH-WANG.pronounObject": "他",
+  "PARTSMITH-WANG.possessiveAdjective": "他的",
+  "PARTSMITH-WANG.pronounPossessive": "他的",
+  "PARTSMITH-WANG.bestiaryQuote": "星辰会记得他的威名。",
+  "PARTSMITH-WANG.bestiaryKillQuote": "辉星熄灭于尘埃。",
+  "PARTSMITH-WANG.cardsModifierTitle": "拼接",
+  "PARTSMITH-WANG.cardsModifierDescription": "费用卡提供骨架,效果卡嵌入其中,点数之和不能超过容量。",
+  "PARTSMITH-WANG.eventDeathPrevention": "王的身躯正在星辉中重组……",
+  "PARTSMITH-WANG.goldMonologue": "这些金币,足以再铸一剑。",
+  "PARTSMITH-WANG.aromaPrinciple": "锻造的气息,伴随着星光的味道。",
+  "PARTSMITH-WANG.banter.alive.endTurnPing": "该你出手了,伙伴。",
+  "PARTSMITH-WANG.banter.dead.endTurnPing": "……星光未灭。"
 }

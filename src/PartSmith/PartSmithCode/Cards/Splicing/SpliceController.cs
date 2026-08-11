@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using BaseLib.Abstracts;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Models;
@@ -12,6 +13,46 @@ namespace PartSmith.PartSmithCode.Cards.Splicing;
 /// </summary>
 public static class SpliceController
 {
+    /// <summary>宿主卡 <c>_baseStarCost</c> 私有字段(反射写,方案 A 宿主携带星费)。</summary>
+    private static readonly FieldInfo BaseStarCostField =
+        typeof(CardModel).GetField("_baseStarCost", BindingFlags.NonPublic | BindingFlags.Instance)!;
+
+    /// <summary>宿主卡 <c>_starCostSet</c> 惰性初始化标记(反射写 true,防止 BaseStarCost getter 从 canonical 覆盖)。</summary>
+    private static readonly FieldInfo StarCostSetField =
+        typeof(CardModel).GetField("_starCostSet", BindingFlags.NonPublic | BindingFlags.Instance)!;
+
+    /// <summary>
+    /// 宿主拼卡应携带的星费:已拼效果星费之和(仅 StarCost &gt; 0 的效果计入);
+    /// 没有星费效果时返回 -1(无星费)。
+    /// </summary>
+    public static int StarCostOf(CardModel costCard)
+    {
+        int sum = AttachedEffects(costCard).Sum(e => e.StarCost);
+        return sum > 0 ? sum : -1;
+    }
+
+    /// <summary>
+    /// 方案 A 宿主携带星费:把宿主可变实例的 <c>_baseStarCost</c> 反射写成 <see cref="StarCostOf"/> 的结果,
+    /// 并置 <c>_starCostSet = true</c>。基游戏的打出流程随后免费接管一切:
+    /// 星费显示 / 星不足灰显(<see cref="UnplayableReason.StarCostTooHigh"/>) / 打出自动 SpendStars /
+    /// <c>LastStarsSpent</c> 就位 → <c>ResolveStarXValue()</c> 可用。
+    ///
+    /// canonical 宿主(无拼卡修饰器)无需处理:<c>BaseStarCost</c> getter 对非 mutable 卡直接返回
+    /// <c>CanonicalStarCost</c>(=-1);战斗/牌组里的可变宿主在拼接后必须调用本方法写入。
+    /// 拼接/拆拼(以及 parttest 的 AttachUnchecked)都要调,保持星费与已拼效果同步。
+    /// </summary>
+    public static void RefreshHostStarCost(CardModel costCard)
+    {
+        if (!costCard.IsMutable)
+        {
+            return;
+        }
+        BaseStarCostField.SetValue(costCard, StarCostOf(costCard));
+        StarCostSetField.SetValue(costCard, true);
+        // 注意:StarCostChanged 是 CardModel 事件,外部类不能 invoke(CS0079);
+        // 拼接/拆拼都发生在战斗外或新建战斗实例上,渲染时自会读 CurrentStarCost,无需主动刷新。
+    }
+
     /// <summary>费用卡上已拼效果的点数之和。</summary>
     public static int UsedPoints(CardModel costCard)
         => Attachments(costCard).Sum(m => m.ResolveEffectCard()?.PointCost ?? 0);
@@ -54,6 +95,9 @@ public static class SpliceController
         {
             costCard.AddKeyword(keyword);
         }
+
+        // 星费(方案 A 宿主携带星费):宿主累加已拼效果的星费,基游戏随后免费接管灰显/扣星。
+        RefreshHostStarCost(costCard);
         return modifier;
     }
 
@@ -81,6 +125,9 @@ public static class SpliceController
                 costCard.RemoveKeyword(kw);
             }
         }
+
+        // 星费同步:拆拼后无效果 → 宿主星费复位为 -1(无星费)。
+        RefreshHostStarCost(costCard);
         return effects;
     }
 }

@@ -111,3 +111,53 @@ public class PartSmithHunterEffectCardPool : CustomCardPoolModel
 
     public override Color EnergyOutlineColor => new Color("1A6625");
 }
+
+/// <summary>
+/// 王(储君)费用卡片专属池:与 <see cref="PartSmithCostCardPool"/> 同构,但费用图标换成原版储君(regent 橙)。
+/// 王的费用卡 = 14 个 Wang 壳子类(复用战士壳全部逻辑,见 Cards/CostCards/WangCostShells.cs),
+/// 卡池归属本池 → 卡面费用图标/描边自动走储君配色,不动大战士/猎人的池。
+/// 图标资源(游戏 pck 已核实存在):
+/// BigEnergyIconPath = energy_regent.tres,TextEnergyIconPath = regent_energy_icon.png,
+/// EnergyOutlineColor = #803D0E / DeckEntryCardColor = #E36600(原版 RegentCardPool 配色)。
+/// </summary>
+public class PartSmithWangCostCardPool : CustomCardPoolModel
+{
+    public override string Title => "partsmith_wang_cost";
+
+    public override bool IsShared => true;
+
+    public override Color DeckEntryCardColor => new Color("E36600");
+
+    public override bool SeenByDefault => true;
+
+    public override bool IsColorless => true;
+
+    public override string? BigEnergyIconPath => "res://images/atlases/ui_atlas.sprites/card/energy_regent.tres";
+
+    public override string? TextEnergyIconPath => "res://images/packed/sprite_fonts/regent_energy_icon.png";
+
+    public override Color EnergyOutlineColor => new Color("803D0E");
+}
+
+/// <summary>
+/// 王(储君)效果卡片专属池:与 <see cref="PartSmithEffectCardPool"/> 同构,费用图标走储君 regent 橙。
+/// 阶段 B2 生成的王效果卡(<原版储君卡>Fragment)注册进本池。
+/// </summary>
+public class PartSmithWangEffectCardPool : CustomCardPoolModel
+{
+    public override string Title => "partsmith_wang_effect";
+
+    public override bool IsShared => true;
+
+    public override Color DeckEntryCardColor => new Color("FF9E2C");
+
+    public override bool SeenByDefault => true;
+
+    public override bool IsColorless => true;
+
+    public override string? BigEnergyIconPath => "res://images/atlases/ui_atlas.sprites/card/energy_regent.tres";
+
+    public override string? TextEnergyIconPath => "res://images/packed/sprite_fonts/regent_energy_icon.png";
+
+    public override Color EnergyOutlineColor => new Color("803D0E");
+}
