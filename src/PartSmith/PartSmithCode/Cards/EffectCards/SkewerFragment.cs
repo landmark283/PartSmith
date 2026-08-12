@@ -18,7 +18,7 @@ using System.Threading.Tasks;
 
 namespace PartSmith.PartSmithCode.Cards.EffectCards;
 
-/// <summary>效果卡:点数 4。Skewer。效果同原版 Skewer(猎人)。</summary>
+/// <summary>效果卡:点数 1。Skewer。效果同原版 Skewer(猎人,X 费)。</summary>
 [Pool(typeof(PartSmithHunterEffectCardPool))]
 public class SkewerFragment : EffectCardModelBase
 {
@@ -26,7 +26,7 @@ public class SkewerFragment : EffectCardModelBase
     {
     }
 
-    public override int PointCost => 4;
+    public override int PointCost => 1;
 
     protected override CardModel PortraitSourceCard => ModelDb.Card<Skewer>();
     protected override IEnumerable<DynamicVar> CanonicalVars => new DynamicVar[]
@@ -42,7 +42,8 @@ public class SkewerFragment : EffectCardModelBase
     public override async Task ExecuteEffect(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         if (cardPlay.Target == null) { return; }
-        await DamageCmd.Attack(UpgradedValue(cardPlay, base.DynamicVars.Damage.BaseValue, 3m)).WithHitCount(ResolveEnergyXValue()).FromCard(cardPlay.Card, cardPlay)
+        int num = await XCostHelper.ResolveAndSpend(cardPlay);
+        await DamageCmd.Attack(UpgradedValue(cardPlay, base.DynamicVars.Damage.BaseValue, 3m)).WithHitCount(num).FromCard(cardPlay.Card, cardPlay)
             .Targeting(cardPlay.Target)
             .WithHitVfxNode((Creature t) => NStabVfx.Create(t, facingEnemies: true, VfxColor.Gold))
             .Execute(choiceContext);

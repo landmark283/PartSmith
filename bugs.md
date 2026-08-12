@@ -1,3 +1,41 @@
+### 潜伏 X 费 bug:5 张 X 费效果卡修复 + 简化卡恢复含 X(2026-08-12 发现并修复)
+
+**现象**:拼了猎人 `Skewer`、猎人 `Malaise`、王 `HeavenlyDrill` 效果的拼卡打出 → 抛异常(代码路径已确认)。
+
+**根因**:这三张是原版 `HasEnergyCostX`(X 费)卡,生成的 Fragment 在 `ExecuteEffect` 里机械照抄了 `ResolveEnergyXValue()`。但效果卡单例构造 `base(0, ...)` 不带 X 费、生成的 Fragment **没覆写 `HasEnergyCostX`** → `this.EnergyCost.CostsX == false` → `ResolveEnergyXValue()`(`CardModel.cs:1123`)直接 `throw new InvalidOperationException("This card does not have an X-cost.")`。效果卡不在战斗牌堆,`CombatState`/`CapturedXValue` 都为空,这个调用永远走 throw 分支。
+
+**同族排查**:5 角色池全量查 `HasEnergyCostX => true`,共 9 张(Volley 是无色卡不入池)。除上述 3 张崩外,骨头人 `Dirge`/`Eradicate` 被生成器**简化**成固定值(召唤 2 次 / 命中 3 次),与 X 语义不符。机器人 `MultiCast`/`Tempest` 已在移植时手写 X。
+
+**补移植(2026-08-12 下午)**:大战士 `Whirlwind`(旋风斩)当初与 Cascade 一起作为 X 费被生成器排除、未移植。现按 X 费方案全部补齐:
+- `WhirlwindFragment`(点数 1,AllEnemies 命中 X 次,5 伤升级 +3,带原版横向斩击 vfx+sfx,`PortraitSourceCard = Whirlwind`)。**已验证打出正常**。
+- `CascadeFragment`(点数 1,打出抽牌堆顶 X{升级+1} 张,`CardPileCmd.AutoPlayFromDrawPile`)。
+- `SearingBlowFragment`(灼热打击,点数 6):**自制卡**(原版 StS2 无 SearingBlow),可无限次升级,伤害非线性成长 `damage(L)=12+3L+L(L+1)/2`(每级增量 +4,+5,+6…);`MaxUpgradeLevels=int.MaxValue` 吃满宿主升级级数;覆写 `RefreshPreviewForHost` 显示当前级数真实伤害(+力量/易伤钩子,diff 基线=当前伤害不重复绿);卡面临时借 AshenStrike,待 #26 自定义卡图。
+
+**修复(2026-08-12,已构建部署)**:
+- 新建 `Cards/Base/XCostHelper.cs`:`ResolveAndSpend(cardPlay)` = 快照 `Energy` → `PlayerCmd.LoseEnergy(X)` 全花 → 返回 X。5 张共用。
+- `Skewer`(命中 X 次)/ `Malaise`(力量−X 虚弱 X,升级 X+1)/ `HeavenlyDrill`(命中 X,≥4 翻倍)→ 改调 `XCostHelper.ResolveAndSpend`,不再调 `ResolveEnergyXValue`。
+- `Dirge` 恢复:召唤 X 次 + X 灵魂(原固定 2);`Eradicate` 恢复:命中 X 次(原固定 3),eng/zhs 描述补 "X 次"。
+- **7 张 X 费效果卡点数一律 = 1**(MultiCast/Tempest 也归 1);升级语义不动(单级 `IsUpgraded`,+2/+3 同 +1,各卡保留原版伤害/召唤+X+1)。
+- 同步 5 个生成 JSON(`partsmith_*_effect_cards.json`)pointCost=1,防再生成回退。
+
+**语义**:X = 打出时的当前能量(宿主壳费用已扣),立刻全花 → 对应原版 X 费"全花剩余能量"。已知取舍:宿主壳非 X 费,0 能量仍可打出 → X=0 空打(无灰显)。
+
+---
+
+## 机器人(Defect fork)移植完成(2026-08-12)
+
+完整移植见 `robot_recreation_plan.md`。要点:角色「机器人」(PlaceholderID="defect",BaseOrbSlotCount=3 继承充能球体系)+ 机器人专属池(defect 蓝图标)+ 17 共享壳瘦子 + 8 专属壳 + **87 张效果卡**(91−4 Basic)。规避/修正的坑:
+- **CalculatedVar 单例陷阱**(Barrage/CompileDriver/FlakCannon/HelixDrill/Synchronize/Voltaic):效果卡单例 CombatState null → CalculatedX 恒 0 → 手写从宿主上下文算 + 剥 Calculated* var + 描述去 `{InCombat:\n(...)|}` 行。
+- **X 费陷阱**(MultiCast/Tempest):见上,手写全花当前能量,不调 ResolveEnergyXValue。
+- **自克隆陷阱**(AdaptiveStrike):克隆宿主拼卡 `cardPlay.Card.CreateClone()`,不克隆效果卡单例。
+- **成长卡**(Claw/GeneticAlgorithm):新写 `ClawExtraModifier`/`GenAlgoExtraModifier`(挂宿主拼卡实例,不存效果卡单例)。
+- **选牌界面**(Hologram):补 `PARTSMITH-HOLOGRAM_FRAGMENT.selectionScreenPrompt` 本地化键。
+- **System 类型名冲突**(Buffer/Turbo):`Buffer`/`Void` 与 System.Buffer/System.Void 冲突(CS0104),全限定 `global::MegaCrit.Sts2.Core.Models.Cards.X`。
+- **私人字段**(Ftl `CanDrawCard`):手动内联。
+- **升级去除关键词不迁移**(Chill/EchoForm/Fusion/Hologram/Hotfix/Ignition/Rainbow/Voltaic 升级去 Exhaust/Ethereal):拼卡体系只支持升级加关键词(`UpgradeKeyword`),与猎人 DemonicShield 同款已知偏差。
+
+---
+
 ## 吊杀(Hang)拼卡伤害不乘层数 + 行动缓慢改为消耗制(2026-08-11)
 
 ### 1. 吊杀:拼卡打出的伤害不乘吊杀层数(钩子失效)

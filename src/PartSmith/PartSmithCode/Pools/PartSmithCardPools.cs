@@ -211,3 +211,53 @@ public class PartSmithBoneManEffectCardPool : CustomCardPoolModel
 
     public override Color EnergyOutlineColor => new Color("803367");
 }
+
+/// <summary>
+/// 机器人(故障机器人)费用卡片专属池:与 <see cref="PartSmithCostCardPool"/> 同构,但费用图标换成原版故障机器人(defect 蓝)。
+/// 机器人的费用卡 = 17 个共享壳瘦子类 + 8 个机器人专属壳(见 Cards/CostCards/RobotSharedCostShells.cs / RobotCharacterCostShells.cs),
+/// 卡池归属本池 → 卡面费用图标/描边自动走故障机器人配色,不动大战士/猎人/王/骨头人的池。
+/// 图标资源(游戏 pck 已核实存在):
+/// BigEnergyIconPath = energy_defect.tres,TextEnergyIconPath = defect_energy_icon.png,
+/// EnergyOutlineColor = #1D5673 / DeckEntryCardColor = #3EB3ED(原版 DefectCardPool 配色)。
+/// </summary>
+public class PartSmithRobotCostCardPool : CustomCardPoolModel
+{
+    public override string Title => "partsmith_robot_cost";
+
+    public override bool IsShared => true;
+
+    public override Color DeckEntryCardColor => new Color("3EB3ED");
+
+    public override bool SeenByDefault => true;
+
+    public override bool IsColorless => true;
+
+    public override string? BigEnergyIconPath => "res://images/atlases/ui_atlas.sprites/card/energy_defect.tres";
+
+    public override string? TextEnergyIconPath => "res://images/packed/sprite_fonts/defect_energy_icon.png";
+
+    public override Color EnergyOutlineColor => new Color("1D5673");
+}
+
+/// <summary>
+/// 机器人(故障机器人)效果卡片专属池:与 <see cref="PartSmithEffectCardPool"/> 同构,费用图标走故障机器人 defect 蓝。
+/// 阶段 B2 生成的机器人效果卡(<原版故障机器人卡>Fragment)注册进本池。
+/// </summary>
+public class PartSmithRobotEffectCardPool : CustomCardPoolModel
+{
+    public override string Title => "partsmith_robot_effect";
+
+    public override bool IsShared => true;
+
+    public override Color DeckEntryCardColor => new Color("5AC8FA");
+
+    public override bool SeenByDefault => true;
+
+    public override bool IsColorless => true;
+
+    public override string? BigEnergyIconPath => "res://images/atlases/ui_atlas.sprites/card/energy_defect.tres";
+
+    public override string? TextEnergyIconPath => "res://images/packed/sprite_fonts/defect_energy_icon.png";
+
+    public override Color EnergyOutlineColor => new Color("1D5673");
+}

@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 
 namespace PartSmith.PartSmithCode.Cards.EffectCards;
 
-/// <summary>效果卡:点数 5。Heavenly Drill。效果同原版 HeavenlyDrill(储君)。</summary>
+/// <summary>效果卡:点数 1。Heavenly Drill。效果同原版 HeavenlyDrill(储君,X 费)。</summary>
 [Pool(typeof(PartSmithWangEffectCardPool))]
 public class HeavenlyDrillFragment : EffectCardModelBase
 {
@@ -25,7 +25,7 @@ public class HeavenlyDrillFragment : EffectCardModelBase
     {
     }
 
-    public override int PointCost => 5;
+    public override int PointCost => 1;
 
     protected override CardModel PortraitSourceCard => ModelDb.Card<HeavenlyDrill>();
     protected override IEnumerable<DynamicVar> CanonicalVars => new DynamicVar[]
@@ -42,7 +42,7 @@ public class HeavenlyDrillFragment : EffectCardModelBase
     public override async Task ExecuteEffect(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         if (cardPlay.Target == null) { return; }
-        int num = ResolveEnergyXValue();
+        int num = await XCostHelper.ResolveAndSpend(cardPlay);
         if (num >= base.DynamicVars.Energy.IntValue)
         {
             num *= 2;

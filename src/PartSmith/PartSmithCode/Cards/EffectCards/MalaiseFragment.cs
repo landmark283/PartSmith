@@ -19,7 +19,7 @@ using System.Threading.Tasks;
 
 namespace PartSmith.PartSmithCode.Cards.EffectCards;
 
-/// <summary>效果卡:点数 5。Malaise。效果同原版 Malaise(猎人)。</summary>
+/// <summary>效果卡:点数 1。Malaise。效果同原版 Malaise(猎人,X 费)。</summary>
 [Pool(typeof(PartSmithHunterEffectCardPool))]
 public class MalaiseFragment : EffectCardModelBase
 {
@@ -27,7 +27,7 @@ public class MalaiseFragment : EffectCardModelBase
     {
     }
 
-    public override int PointCost => 5;
+    public override int PointCost => 1;
 
     protected override CardModel PortraitSourceCard => ModelDb.Card<Malaise>();
     public override IEnumerable<CardKeyword> CanonicalKeywords => new[] { CardKeyword.Exhaust };
@@ -35,7 +35,7 @@ public class MalaiseFragment : EffectCardModelBase
     public override async Task ExecuteEffect(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         if (cardPlay.Target == null) { return; }
-        int powerAmount = ResolveEnergyXValue();
+        int powerAmount = await XCostHelper.ResolveAndSpend(cardPlay);
         if (cardPlay.Card.IsUpgraded)
         {
             powerAmount++;

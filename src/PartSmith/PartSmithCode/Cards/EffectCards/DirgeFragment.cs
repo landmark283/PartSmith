@@ -18,7 +18,7 @@ using System.Threading.Tasks;
 
 namespace PartSmith.PartSmithCode.Cards.EffectCards;
 
-/// <summary>效果卡:点数 4。Dirge。效果同原版 Dirge(亡灵契约师)。</summary>
+/// <summary>效果卡:点数 1。Dirge。效果同原版 Dirge(亡灵契约师,X 费)。</summary>
 [Pool(typeof(PartSmithBoneManEffectCardPool))]
 public class DirgeFragment : EffectCardModelBase
 {
@@ -26,7 +26,7 @@ public class DirgeFragment : EffectCardModelBase
     {
     }
 
-    public override int PointCost => 4;
+    public override int PointCost => 1;
 
     protected override CardModel PortraitSourceCard => ModelDb.Card<Dirge>();
     public override IEnumerable<CardKeyword> CanonicalKeywords => new[] { CardKeyword.Exhaust };
@@ -43,11 +43,12 @@ public class DirgeFragment : EffectCardModelBase
     public override async Task ExecuteEffect(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await CreatureCmd.TriggerAnim(cardPlay.Player.Creature, "Cast", cardPlay.Player.Character.CastAnimDelay);
-        for (int i = 0; i < 2; i++)
+        int xValue = await XCostHelper.ResolveAndSpend(cardPlay);
+        for (int i = 0; i < xValue; i++)
         {
             await OstyCmd.Summon(choiceContext, cardPlay.Player, UpgradedValue(cardPlay, base.DynamicVars.Summon.BaseValue, 1m), cardPlay.Card);
         }
-        var souls = Soul.Create(cardPlay.Player, 2, cardPlay.Card.CombatState).ToList();
+        var souls = Soul.Create(cardPlay.Player, xValue, cardPlay.Card.CombatState).ToList();
         if (cardPlay.Card.IsUpgraded)
         {
             foreach (var soul in souls)

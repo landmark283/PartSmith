@@ -44,6 +44,8 @@ internal static class PartSmithCardLibraryFiltersPatch
     private const string WangEffectFilterName = "FILTER-partsmith_wang_effect";
     private const string BoneManCostFilterName = "FILTER-partsmith_boneman_cost";
     private const string BoneManEffectFilterName = "FILTER-partsmith_boneman_effect";
+    private const string RobotCostFilterName = "FILTER-partsmith_robot_cost";
+    private const string RobotEffectFilterName = "FILTER-partsmith_robot_effect";
 
     /// <summary>
     /// 必须用最高优先级(后置补丁里先跑,已实证本版本 Harmony postfix 按优先级降序执行),
@@ -66,7 +68,8 @@ internal static class PartSmithCardLibraryFiltersPatch
         foreach (var key in poolFilters.Keys)
         {
             if (key.Name.ToString() is CostFilterName or EffectFilterName or HunterCostFilterName or HunterEffectFilterName
-                or WangCostFilterName or WangEffectFilterName or BoneManCostFilterName or BoneManEffectFilterName)
+                or WangCostFilterName or WangEffectFilterName or BoneManCostFilterName or BoneManEffectFilterName
+                or RobotCostFilterName or RobotEffectFilterName)
             {
                 return;
             }
@@ -111,7 +114,17 @@ internal static class PartSmithCardLibraryFiltersPatch
             new Color("EE82EE"), new LocString("card_library", "PARTSMITH_POOL_BONEMAN_EFFECT_TIP"),
             (CardModel c) => c.Pool is PartSmithBoneManEffectCardPool);
 
-        // 大战士局内打开图鉴默认选中「费用卡池」;小猎人默认选中「猎人费用卡池」;王默认选中「王费用卡池」;骨头人默认选中「骨头人费用卡池」。
+        // 机器人专属池(defect 蓝)过滤器按钮。
+        var robotCostFilter = AddFilter(
+            __instance, poolFilters, miscFilter, RobotCostFilterName,
+            new Color("3EB3ED"), new LocString("card_library", "PARTSMITH_POOL_ROBOT_COST_TIP"),
+            (CardModel c) => c.Pool is PartSmithRobotCostCardPool);
+        AddFilter(
+            __instance, poolFilters, robotCostFilter, RobotEffectFilterName,
+            new Color("5AC8FA"), new LocString("card_library", "PARTSMITH_POOL_ROBOT_EFFECT_TIP"),
+            (CardModel c) => c.Pool is PartSmithRobotEffectCardPool);
+
+        // 大战士局内打开图鉴默认选中「费用卡池」;小猎人默认选中「猎人费用卡池」;王默认选中「王费用卡池」;骨头人默认选中「骨头人费用卡池」;机器人默认选中「机器人费用卡池」。
         if (AccessTools.DeclaredField(typeof(NCardLibrary), "_cardPoolFilters").GetValue(__instance)
             is Dictionary<CharacterModel, NCardPoolFilter> cardPoolFilters)
         {
@@ -119,6 +132,7 @@ internal static class PartSmithCardLibraryFiltersPatch
             cardPoolFilters[ModelDb.Character<LittleHunter>()] = hunterCostFilter;
             cardPoolFilters[ModelDb.Character<Wang>()] = wangCostFilter;
             cardPoolFilters[ModelDb.Character<BoneMan>()] = boneManCostFilter;
+            cardPoolFilters[ModelDb.Character<Robot>()] = robotCostFilter;
         }
     }
 

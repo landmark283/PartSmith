@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 
 namespace PartSmith.PartSmithCode.Cards.EffectCards;
 
-/// <summary>效果卡:点数 5。Eradicate。效果同原版 Eradicate(亡灵契约师)。</summary>
+/// <summary>效果卡:点数 1。Eradicate。效果同原版 Eradicate(亡灵契约师,X 费)。</summary>
 [Pool(typeof(PartSmithBoneManEffectCardPool))]
 public class EradicateFragment : EffectCardModelBase
 {
@@ -25,7 +25,7 @@ public class EradicateFragment : EffectCardModelBase
     {
     }
 
-    public override int PointCost => 5;
+    public override int PointCost => 1;
 
     protected override CardModel PortraitSourceCard => ModelDb.Card<Eradicate>();
     public override IEnumerable<CardKeyword> CanonicalKeywords => new[] { CardKeyword.Retain };
@@ -42,7 +42,8 @@ public class EradicateFragment : EffectCardModelBase
     public override async Task ExecuteEffect(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         if (cardPlay.Target == null) { return; }
-        await DamageCmd.Attack(UpgradedValue(cardPlay, base.DynamicVars.Damage.BaseValue, 3m)).WithHitCount(3).FromCard(cardPlay.Card, cardPlay)
+        int num = await XCostHelper.ResolveAndSpend(cardPlay);
+        await DamageCmd.Attack(UpgradedValue(cardPlay, base.DynamicVars.Damage.BaseValue, 3m)).WithHitCount(num).FromCard(cardPlay.Card, cardPlay)
             .Targeting(cardPlay.Target)
             .WithHitFx("vfx/vfx_attack_slash")
             .Execute(choiceContext);
