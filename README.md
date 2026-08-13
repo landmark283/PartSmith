@@ -13,3 +13,10 @@
 有问题可以来github，提issue或者request反馈：
 仓库地址：https://github.com/landmark283/PartSmith
 https://space.bilibili.com/3546978505984346
+
+## ai 开发指南
+如果有意要修改该mod，那么可能需要给ai提供baselib和杀戮尖塔本体的源代码。可以使用让ai去找反编译工具。
+可以给ai提供的信息：
+api-notes.md
+bugs.md
+bridge_card_testing.md 用于让ai自测，目前看来效果不佳。

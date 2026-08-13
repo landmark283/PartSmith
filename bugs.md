@@ -1,3 +1,16 @@
+## v0.1.1 三个问题修复(2026-08-13,方案见 `v0.1.1修改方案.md`,已构建部署)
+
+**1. 百科全书不显示效果卡升级数值**
+根因:图鉴升级预览走原版 `CardModel.GetDescriptionForUpgradePreview`,而升级数值抬升只在拼接时由 `RefreshPreviewForHost`(需宿主)执行,裸效果卡数值停在基础值。修复:`Patches/EffectCardUpgradePreviewPatch.cs` prefix hook `GetDescriptionForUpgradePreview`,当被渲染的是裸效果卡时 `effect.RefreshPreviewForHost(effect, null)`(图鉴 inspect 已 MutableClone+UpgradeInternal,宿主=自己即取到升级级数)。纯展示,不改 BaseValue。
+
+**2. 储君效果卡不显示所需星辉**
+根因:原版 NCard 星费节点(`%StarLabel/%StarIcon`)按 `GetStarCostWithModifiers()` 显示,效果卡是 canonical 单例、该值恒 -1 → 星费被隐藏。修复:`Patches/NCardStarCostLabelPatch.cs` postfix `NCard.UpdateVisuals`,Model 是裸效果卡时点亮原版星节点、填 `effect.StarCost`(储君 20 张 StarCost>0 生效,其余角色恒 0 自动隐藏)。NCard 是所有卡面渲染共用节点 → 覆盖奖励 3 选 1/图鉴/检视/篝火/拼卡选牌全部界面。
+
+**3. 拼接效果缺失(群攻在前 + 单目标在后)**
+根因:`CostCardModelBase.TargetType` 取首个非 None/Self 效果的 TargetType,群攻(AllEnemies)在前 → 宿主整体变群攻 → 基游戏不弹单目标选择 → 后方 152 张单目标效果卡(AnyEnemy 146 + AnyAlly 6)的 `cardPlay.Target` 为 null → 全被 `if (cardPlay.Target == null) return;` 静默跳过。修复(方案2,`EffectAttachmentModifier.OnPlay` 加 `EnsureTargetFallback`):按效果阵营校验——当前 target 阵营不符时,从 `CombatState.HittableEnemies` / `PlayerCreatures.Where(IsAlive)` 用确定性 Rng(`RunState.Rng.CombatTargets`,多人联机跨机一致)随机补一个,反射写 `cardPlay.Target`(`<Target>k__BackingField`,required init 构造后不可改)。同阵营后续效果共用该目标(如 Twin Strike 打同一敌人),换阵营重新随机。群攻/随机/自身等不依赖 Target 的类型不兜底。1 处改动覆盖全部 152 张,无需逐卡改。
+
+---
+
 ### 潜伏 X 费 bug:5 张 X 费效果卡修复 + 简化卡恢复含 X(2026-08-12 发现并修复)
 
 **现象**:拼了猎人 `Skewer`、猎人 `Malaise`、王 `HeavenlyDrill` 效果的拼卡打出 → 抛异常(代码路径已确认)。

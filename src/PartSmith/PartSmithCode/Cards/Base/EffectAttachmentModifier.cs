@@ -1,3 +1,5 @@
+using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using BaseLib.Abstracts;
 using MegaCrit.Sts2.Core.Commands;
@@ -113,7 +115,47 @@ public class EffectAttachmentModifier : CardModifier
         {
             await PlayerCmd.GainEnergy(effect.UpgradeEnergyGain, cardPlay.Player);
         }
+        // 目标兜底(v0.1.1 问题3):群攻效果在前时宿主 TargetType 派生为全体、cardPlay.Target
+        // 为 null,需要单目标的效果会被静默跳过;这里按效果阵营补一个有效目标,保证其能打出。
+        EnsureTargetFallback(cardPlay, effect);
         await effect.ExecuteEffect(choiceContext, cardPlay);
+    }
+
+    /// <summary>CardPlay.Target 是 required init 属性、构造后不可改,兜底时用反射写 backing field。</summary>
+    private static readonly FieldInfo? CardPlayTargetField = typeof(CardPlay)
+        .GetField("<Target>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance);
+
+    /// <summary>
+    /// 目标兜底(方案 2,见 v0.1.1修改方案 问题3):当前 cardPlay.Target 对该效果不是有效目标时,
+    /// 从对应阵营的存活生物里随机补一个,并写回 cardPlay.Target。随机源用确定性 Rng
+    /// (<c>RunState.Rng.CombatTargets</c>,多人联机跨机一致)。同阵营的后续单目标效果会共用
+    /// 这个目标(如 Twin Strike 两次打同一敌人);换阵营时重新随机,互不串用。
+    /// 群攻/随机/自身等不依赖 cardPlay.Target 的类型无需兜底。
+    /// </summary>
+    private static void EnsureTargetFallback(CardPlay cardPlay, EffectCardModelBase effect)
+    {
+        if (effect.TargetType is not (TargetType.AnyEnemy or TargetType.AnyAlly))
+        {
+            return;
+        }
+        // 现目标阵营正确则尊重(手选或已兜底):AnyEnemy 要求敌方、AnyAlly 要求己方。
+        if (cardPlay.Target is { } existing && (existing.IsPlayer == (effect.TargetType == TargetType.AnyAlly)))
+        {
+            return;
+        }
+
+        IEnumerable<Creature>? candidates = effect.TargetType == TargetType.AnyEnemy
+            ? cardPlay.Card.CombatState?.HittableEnemies
+            : cardPlay.Card.CombatState?.PlayerCreatures.Where(c => c.IsAlive);
+        if (candidates == null || CardPlayTargetField == null)
+        {
+            return;
+        }
+        Creature? fallback = cardPlay.Player.RunState.Rng.CombatTargets.NextItem(candidates);
+        if (fallback != null)
+        {
+            CardPlayTargetField.SetValue(cardPlay, fallback);
+        }
     }
 
     /// <summary>
